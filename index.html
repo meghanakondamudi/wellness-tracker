@@ -361,6 +361,30 @@
             font-size: 0.95em;
         }
     }
+        .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.game-btn {
+    background: var(--pale-pink);
+    color: var(--text-dark);
+    border: none;
+    padding: 15px;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+    min-height: 60px;
+}
+
+.game-btn:hover {
+    background: var(--soft-pink);
+    transform: scale(1.05);
+}
     
     @media (max-width: 480px) {
         h1 {
@@ -663,12 +687,13 @@
                 <div class="mood-icon">🎮</div>
                 <h3>Play a Quick Game</h3>
                 <p>Distract yourself with something fun:</p>
-                <div class="grid">
+                 <div class="grid">
                     <button class="game-btn" onclick="window.open('https://www.nytimes.com/games/wordle')">🔠 Wordle</button>
-                    <button class="game-btn" onclick="window.open('https://quickdraw.withgoogle.com')">🎨 Quick Draw</button>
+                    <button class="game-btn" onclick="window.open('https://www.nytimes.com/games/sudoku')">🧩 Sudoku</button>
+                    <button class="game-btn" onclick="window.open('https://play2048.co')">🔢 2048</button>
+                    <button class="game-btn" onclick="window.open('https://skribbl.io')">✏️ Skribbl.io</button>
                 </div>
             </div>
-        </div>
         
         <div class="slider-container">
             <label for="mood">Current Mood:</label>
