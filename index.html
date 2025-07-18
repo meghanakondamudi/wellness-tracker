@@ -325,13 +325,13 @@
         </header>
         
         <div class="tabs">
-            <button class="tab-btn active" onclick="openTab(event, 'dashboard')">Dashboard</button>
-            <button class="tab-btn" onclick="openTab(event, 'health-info')">Health Info</button>
-            <button class="tab-btn" onclick="openTab(event, 'daily-tracker')">Daily Tracker</button>
-            <button class="tab-btn" onclick="openTab(event, 'analytics')">Analytics</button>
-            <button class="tab-btn" onclick="openTab(event, 'low-mood')">Low Mood</button>
-            <button class="tab-btn" onclick="openTab(event, 'recommendations')">Recommendations</button>
-        </div>
+    <button class="tab-btn active" onclick="openTab(event, 'dashboard')">🌼 Dashboard</button>
+    <button class="tab-btn" onclick="openTab(event, 'health-info')">📚 Health Info</button>
+    <button class="tab-btn" onclick="openTab(event, 'daily-tracker')">📝 Daily Tracker</button>
+    <button class="tab-btn" onclick="openTab(event, 'analytics')">📊 Analytics</button>
+    <button class="tab-btn" onclick="openTab(event, 'low-mood')">🌈 Mood Boost</button>
+    <button class="tab-btn" onclick="openTab(event, 'recommendations')">💡 Recommendations</button>
+</div>
         
         <!-- Dashboard Tab -->
         <div id="dashboard" class="tab-content active">
@@ -636,7 +636,19 @@
                 </div>
             </div>
         </div>
-        
+        <div class="slider-container">
+    <label for="mood">Current Mood:</label>
+    <div class="slider-wrapper">
+        <span>😞</span>
+        <input type="range" id="mood" min="1" max="10" value="5">
+        <span>😊</span>
+        <span class="slider-value" id="mood-value">5</span>
+    </div>
+    <div class="emoji-scale">
+        <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+        <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+    </div>
+</div>
         <!-- Recommendations Tab -->
         <div id="recommendations" class="tab-content">
             <h2>Personalized Recommendations</h2>
