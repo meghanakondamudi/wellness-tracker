@@ -6,202 +6,200 @@
     <title>PCOS & Low Hb Wellness Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root {
-            --pastel-pink: #FFD1DC;
-            --pastel-purple: #E6E6FA;
-            --pastel-blue: #B5EAD7;
-            --pastel-green: #C7F0DB;
-            --pastel-yellow: #FFFACD;
-            --pastel-peach: #FFDFD3;
-            --text-dark: #5D5D5D;
-            --text-light: #7F7F7F;
-        }
-        
-        body {
-            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
-            background-color: #FFF9FB;
-            color: var(--text-dark);
-            margin: 0;
-            padding: 0;
-            line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        header {
-            background: linear-gradient(135deg, var(--pastel-pink), var(--pastel-purple));
-            padding: 30px 0;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        
-        h1 {
-            color: white;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-            margin: 0;
-            font-size: 2.5em;
-        }
-        
-        .tabs {
-            display: flex;
-            background-color: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        
-        .tab-btn {
-            flex: 1;
-            padding: 15px;
-            text-align: center;
-            background-color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: bold;
-            color: var(--text-light);
-            transition: all 0.3s ease;
-        }
-        
-        .tab-btn.active {
-            background-color: var(--pastel-blue);
-            color: var(--text-dark);
-        }
-        
-        .tab-content {
-            display: none;
-            padding: 30px;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .card {
-            background-color: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .card h3 {
-            color: var(--pastel-purple);
-            margin-top: 0;
-        }
-        
-        .btn {
-            background-color: var(--pastel-pink);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            margin: 5px;
-        }
-        
-        .btn:hover {
-            background-color: var(--pastel-purple);
-            transform: scale(1.05);
-        }
-        
-        .mood-activity {
-            background-color: var(--pastel-yellow);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-        
-        .mood-activity h3 {
-            color: #FF9AA2;
-        }
-        
-        .journal-entry {
-            width: 100%;
-            height: 150px;
-            border: 2px dashed var(--pastel-blue);
-            border-radius: 12px;
-            padding: 15px;
-            font-family: inherit;
-            margin-bottom: 15px;
-        }
-        
-        .game-container {
-            background-color: var(--pastel-peach);
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-        }
-        
-        .game-btn {
-            background-color: #FF9AA2;
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            font-size: 1.1em;
-        }
-        
-        .game-btn:hover {
-            background-color: #FFB7B2;
-            transform: scale(1.05);
-        }
-        
-        .playlist-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
+    :root {
+        --soft-lavender: #ADB2D4;
+        --pale-aqua: #C7D9DD;
+        --mint-cream: #D5E5D5;
+        --light-beige: #EEF1DA;
+        --text-dark: #5D5D5D;
+        --text-light: #7F7F7F;
+    }
+    
+    body {
+        font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+        background-color: #FAFAFA;
+        color: var(--text-dark);
+        margin: 0;
+        padding: 0;
+        line-height: 1.6;
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    header {
+        background: linear-gradient(135deg, var(--soft-lavender), var(--pale-aqua));
+        padding: 30px 0;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    h1 {
+        color: white;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        margin: 0;
+        font-size: 2.5em;
+    }
+    
+    .tabs {
+        display: flex;
+        background-color: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .tab-btn {
+        flex: 1;
+        padding: 15px;
+        text-align: center;
+        background-color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 1em;
+        font-weight: bold;
+        color: var(--text-light);
+        transition: all 0.3s ease;
+    }
+    
+    .tab-btn.active {
+        background-color: var(--mint-cream);
+        color: var(--text-dark);
+    }
+    
+    .tab-content {
+        display: none;
+        padding: 30px;
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .tab-content.active {
+        display: block;
+        animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .card {
+        background-color: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .card h3 {
+        color: var(--soft-lavender);
+        margin-top: 0;
+    }
+    
+    .btn {
+        background-color: var(--soft-lavender);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        margin: 5px;
+    }
+    
+    .btn:hover {
+        background-color: var(--pale-aqua);
+        transform: scale(1.05);
+    }
+    
+    .mood-activity {
+        background-color: var(--light-beige);
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .mood-activity h3 {
+        color: var(--soft-lavender);
+    }
+    
+    .journal-entry {
+        width: 100%;
+        height: 150px;
+        border: 2px dashed var(--mint-cream);
+        border-radius: 12px;
+        padding: 15px;
+        font-family: inherit;
+        margin-bottom: 15px;
+    }
+    
+    .game-container {
+        background-color: var(--light-beige);
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+    }
+    
+    .game-btn {
+        background-color: var(--soft-lavender);
+        color: white;
+        border: none;
+        padding: 15px 25px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        font-size: 1.1em;
+    }
+    
+    .game-btn:hover {
+        background-color: var(--pale-aqua);
+        transform: scale(1.05);
+    }
+    
+    .playlist-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .playlist-card {
+        background-color: white;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        width: calc(50% - 15px);
+        box-sizing: border-box;
+    }
+    
+    @media (max-width: 768px) {
         .playlist-card {
-            background-color: white;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            width: calc(50% - 15px);
-            box-sizing: border-box;
+            width: 100%;
         }
-        
-        @media (max-width: 768px) {
-            .playlist-card {
-                width: 100%;
-            }
-        }
-    </style>
+    }
+</style>
 </head>
 <body>
     <div class="container">
