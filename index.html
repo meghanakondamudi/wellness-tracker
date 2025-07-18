@@ -236,6 +236,31 @@
             min-width: 50px;
         }
     }
+        .breath-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .breath-animation {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: #e0e0e0;
+        margin: 0 auto;
+        transition: all 4s ease-in-out;
+    }
+    
+    .breath-instructions {
+        text-align: center;
+    }
+    
+    #breath-timer {
+        font-size: 2em;
+        margin: 10px 0;
+    }
     </style>
 </head>
 <body>
@@ -498,6 +523,36 @@
                     </div>
                 </div>
             </div>
+
+            <div class="mood-card">
+    <h3>Guided Meditation</h3>
+    <p>Take 5 minutes to calm your mind:</p>
+    <div class="grid">
+        <div class="card">
+            <h4>Quick Calm</h4>
+            <p>5-minute anxiety relief</p>
+            <button class="btn" onclick="window.open('https://www.youtube.com/watch?v=inpok4MKVLM')">Listen</button>
+        </div>
+        <div class="card">
+            <h4>Body Scan</h4>
+            <p>Release tension</p>
+            <button class="btn" onclick="window.open('https://www.youtube.com/watch?v=IHF1ID1cd-0')">Listen</button>
+        </div>
+    </div>
+</div>
+
+<div class="mood-card">
+    <h3>Breathing Exercise</h3>
+    <p>Follow this pattern to regulate your nervous system:</p>
+    <div class="breath-container">
+        <div class="breath-animation" id="breath-circle"></div>
+        <div class="breath-instructions">
+            <p id="breath-text">Breathe in... (4 seconds)</p>
+            <p id="breath-timer">4</p>
+            <button class="btn" id="breath-btn" onclick="startBreathing()">Start Breathing Exercise</button>
+        </div>
+    </div>
+
 
             <!-- Journaling Card -->
             <div class="mood-card">
@@ -922,6 +977,68 @@
                     wellnessActivities[entry.wellness].count++;
                 }
             });
+
+            // Add these new breathing exercise functions
+    let breathInterval;
+    let breathPhase = 'in'; // 'in', 'hold', 'out'
+    let breathCount = 4;
+    
+    function startBreathing() {
+        const btn = document.getElementById('breath-btn');
+        const circle = document.getElementById('breath-circle');
+        
+        if(btn.textContent === 'Start Breathing Exercise') {
+            btn.textContent = 'Stop Exercise';
+            breathPhase = 'in';
+            breathCount = 4;
+            circle.style.transform = 'scale(1.2)';
+            circle.style.backgroundColor = '#d0d0d0';
+            updateBreathDisplay();
+            breathInterval = setInterval(breathTimer, 1000);
+        } else {
+            btn.textContent = 'Start Breathing Exercise';
+            clearInterval(breathInterval);
+            document.getElementById('breath-text').textContent = 'Breathe in... (4 seconds)';
+            document.getElementById('breath-timer').textContent = '4';
+            circle.style.transform = 'scale(1)';
+            circle.style.backgroundColor = '#e0e0e0';
+        }
+    }
+    
+    function breathTimer() {
+        const circle = document.getElementById('breath-circle');
+        breathCount--;
+        
+        if(breathCount <= 0) {
+            switch(breathPhase) {
+                case 'in':
+                    breathPhase = 'hold';
+                    breathCount = 4;
+                    document.getElementById('breath-text').textContent = 'Hold... (4 seconds)';
+                    break;
+                case 'hold':
+                    breathPhase = 'out';
+                    breathCount = 6;
+                    document.getElementById('breath-text').textContent = 'Breathe out... (6 seconds)';
+                    circle.style.transform = 'scale(1)';
+                    circle.style.backgroundColor = '#e0e0e0';
+                    break;
+                case 'out':
+                    breathPhase = 'in';
+                    breathCount = 4;
+                    document.getElementById('breath-text').textContent = 'Breathe in... (4 seconds)';
+                    circle.style.transform = 'scale(1.2)';
+                    circle.style.backgroundColor = '#d0d0d0';
+                    break;
+            }
+        }
+        
+        document.getElementById('breath-timer').textContent = breathCount;
+    }
+    
+    function updateBreathDisplay() {
+        document.getElementById('breath-timer').textContent = breathCount;
+    }
             
             // Find top 3 activities with highest average mood
             const topActivities = Object.entries(wellnessActivities)
