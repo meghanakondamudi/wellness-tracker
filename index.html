@@ -5,150 +5,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Serenity Wellness Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Satisfy&family=Aptos&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
     :root {
-        --cream: #F6F5F2;
-        --light-cream: #F0EBE3;
-        --pale-pink: #F3D0D7;
-        --soft-pink: #FFEFEF;
-        --text-dark: #333333;
+        --bg-white: #ffffff;
+        --bg-gray: #f7f7f7;
+        --border-gray: #e0e0e0;
+        --text-dark: #222222;
+        --text-medium: #444444;
         --text-light: #666666;
+        --accent-color: #000000;
     }
     
     body {
-        font-family: 'Aptos', serif;
-        background-color: var(--cream);
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-white);
         color: var(--text-dark);
         margin: 0;
         padding: 0;
         line-height: 1.6;
-        font-size: 16px;
+        font-size: 15px;
     }
     
     .container {
         max-width: 1200px;
         margin: 0 auto;
-        padding: 15px;
+        padding: 20px;
     }
     
     header {
-        background: linear-gradient(135deg, var(--pale-pink), var(--soft-pink));
+        background-color: var(--bg-white);
         padding: 30px 0;
-        border-radius: 12px;
         margin-bottom: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         text-align: center;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    header::after {
-        content: "🌿";
-        position: absolute;
-        font-size: 80px;
-        opacity: 0.1;
-        right: 15px;
-        top: 15px;
+        border-bottom: 1px solid var(--border-gray);
     }
     
     h1, h2, h3, h4 {
-        font-family: 'Pacifico', cursive;
-        font-weight: 400;
-    }
-    
-    h2, h3, h4 {
-        font-family: 'Satisfy', cursive;
+        font-weight: 600;
+        color: var(--text-dark);
     }
     
     h1 {
-        color: var(--text-dark);
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
         margin: 0;
-        font-size: 2.2em;
-        letter-spacing: 0.5px;
-        padding: 0 15px;
+        font-size: 2em;
+        letter-spacing: -0.5px;
     }
     
     h2 {
-        color: var(--text-dark);
-        border-bottom: 2px solid var(--pale-pink);
+        border-bottom: 1px solid var(--border-gray);
         padding-bottom: 8px;
         margin-top: 0;
-        font-size: 1.8em;
+        font-size: 1.5em;
     }
     
     h3 {
-        font-size: 1.4em;
+        font-size: 1.2em;
     }
     
-    /* Mobile-First Tabs */
+    /* Tabs */
     .tabs {
         display: flex;
-        background-color: var(--light-cream);
-        border-radius: 10px;
+        background-color: var(--bg-white);
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         margin-bottom: 20px;
-        border: 1px solid var(--pale-pink);
-        scrollbar-width: none; /* Firefox */
+        border-bottom: 1px solid var(--border-gray);
+        scrollbar-width: none;
     }
     
     .tabs::-webkit-scrollbar {
-        display: none; /* Chrome/Safari */
+        display: none;
     }
     
     .tab-btn {
         flex: 0 0 auto;
-        padding: 14px 16px;
+        padding: 12px 16px;
         text-align: center;
         background-color: transparent;
         border: none;
         cursor: pointer;
         font-size: 0.9em;
-        font-weight: 600;
+        font-weight: 500;
         color: var(--text-light);
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
         position: relative;
         white-space: nowrap;
-        min-width: 80px;
-    }
-    
-    .tab-btn::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 3px;
-        background: var(--pale-pink);
-        transition: all 0.3s ease;
     }
     
     .tab-btn.active {
         color: var(--text-dark);
-        background-color: rgba(243, 208, 215, 0.3);
+        font-weight: 600;
     }
     
     .tab-btn.active::after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
         width: 100%;
+        height: 2px;
+        background: var(--accent-color);
     }
     
     .tab-content {
         display: none;
-        padding: 20px;
-        background-color: var(--light-cream);
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        margin-bottom: 20px;
-        border: 1px solid var(--pale-pink);
+        padding: 20px 0;
     }
     
     .tab-content.active {
         display: block;
-        animation: fadeIn 0.5s ease;
+        animation: fadeIn 0.3s ease;
     }
     
     @keyframes fadeIn {
@@ -156,39 +123,39 @@
         to { opacity: 1; transform: translateY(0); }
     }
     
-    /* Responsive Grid */
+    /* Grid and Cards */
     .grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 15px;
+        gap: 16px;
         margin-bottom: 20px;
     }
     
     .card {
-        background-color: var(--light-cream);
-        border-radius: 10px;
+        background-color: var(--bg-white);
+        border-radius: 6px;
         padding: 20px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
-        border: 1px solid var(--pale-pink);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        transition: all 0.2s ease;
+        border: 1px solid var(--border-gray);
     }
     
     /* Mood Boost Cards */
     .mood-card {
-        background: rgba(255, 239, 239, 0.5);
-        border-radius: 12px;
-        padding: 25px;
-        margin-bottom: 25px;
-        border: 1px dashed var(--pale-pink);
-        transition: transform 0.3s ease;
+        background: var(--bg-white);
+        border-radius: 6px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid var(--border-gray);
+        transition: transform 0.2s ease;
     }
     
     .mood-card:hover {
-        transform: translateY(-3px);
+        transform: translateY(-2px);
     }
     
     .mood-icon {
-        font-size: 2.5rem;
+        font-size: 2rem;
         margin-bottom: 10px;
     }
     
@@ -197,213 +164,72 @@
         margin-bottom: 20px;
     }
     
-    /* Playlist Cards */
-    .playlist-card {
-        background: var(--light-cream);
-        border-radius: 10px;
-        padding: 20px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        border: 1px solid var(--pale-pink);
-    }
-    
-    /* Game Buttons */
-    .game-btn {
-        background: var(--pale-pink);
-        color: var(--text-dark);
-        border: none;
-        padding: 15px;
-        border-radius: 30px;
-        font-size: 1.1rem;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-    
-    .game-btn:hover {
-        background: var(--soft-pink);
-        transform: scale(1.05);
-    }
-    
-    /* Button Group */
-    .btn-group {
-        display: flex;
-        gap: 10px;
-        margin-top: 15px;
-    }
-    
-    .btn-outline {
-        background: transparent;
-        border: 1px solid var(--pale-pink);
-        color: var(--text-dark);
-    }
-    
-    /* Touch-Friendly Buttons */
+    /* Buttons */
     .btn {
-        background-color: var(--pale-pink);
+        background-color: var(--bg-white);
         color: var(--text-dark);
-        border: none;
-        padding: 14px 24px;
-        border-radius: 30px;
+        border: 1px solid var(--border-gray);
+        padding: 10px 16px;
+        border-radius: 6px;
         cursor: pointer;
-        font-weight: 600;
-        transition: all 0.3s ease;
+        font-weight: 500;
+        transition: all 0.2s ease;
         margin: 8px 5px;
-        font-size: 0.95em;
-        letter-spacing: 0.5px;
-        min-width: 120px;
-        min-height: 48px;
+        font-size: 0.9em;
         display: inline-flex;
         align-items: center;
         justify-content: center;
     }
     
     .btn:hover {
-        background-color: var(--soft-pink);
+        background-color: var(--bg-gray);
     }
     
-    /* Enhanced Sliders for Mobile */
+    /* Form Elements */
+    input, select, textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--border-gray);
+        border-radius: 6px;
+        font-family: inherit;
+        font-size: 0.95em;
+        margin-bottom: 15px;
+        box-sizing: border-box;
+        background-color: var(--bg-white);
+    }
+    
+    /* Sliders */
     .slider-container {
         margin: 15px 0;
-    }
-    
-    .slider-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-top: 8px;
     }
     
     input[type="range"] {
         -webkit-appearance: none;
         width: 100%;
-        height: 10px;
-        border-radius: 10px;
-        background: var(--light-cream);
+        height: 6px;
+        border-radius: 3px;
+        background: var(--border-gray);
         outline: none;
     }
     
     input[type="range"]::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
-        width: 24px;
-        height: 24px;
+        width: 18px;
+        height: 18px;
         border-radius: 50%;
-        background: var(--pale-pink);
+        background: var(--accent-color);
         cursor: pointer;
     }
     
-    /* Form Elements */
-    input, select, textarea {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid var(--pale-pink);
-        border-radius: 8px;
-        font-family: inherit;
-        font-size: 1em;
-        margin-bottom: 15px;
-        box-sizing: border-box;
-        background-color: var(--cream);
-    }
-    
-    textarea {
-        min-height: 100px;
-    }
-    
-    /* Breathing Exercise */
-    .breath-animation {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background-color: var(--pale-pink);
-        margin: 15px auto;
-        transition: all 4s ease-in-out;
-    }
-    
-    /* Mobile-Specific Adjustments */
+    /* Mobile Adjustments */
     @media (max-width: 768px) {
         .container {
-            padding: 10px;
-        }
-        
-        header {
-            padding: 25px 0;
-            border-radius: 10px;
-        }
-        
-        h1 {
-            font-size: 1.8em;
-        }
-        
-        h2 {
-            font-size: 1.5em;
+            padding: 15px;
         }
         
         .grid {
             grid-template-columns: 1fr;
-        }
-        
-        .tab-btn {
-            padding: 12px 14px;
-            font-size: 0.85em;
-            min-width: 70px;
-        }
-        
-        .btn {
-            padding: 12px 20px;
-            min-width: 110px;
-        }
-        
-        .playlist-card {
-            width: 100%;
-        }
-        
-        input, select, textarea {
-            padding: 10px;
-            font-size: 0.95em;
-        }
-    }
-        .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.game-btn {
-    background: var(--pale-pink);
-    color: var(--text-dark);
-    border: none;
-    padding: 15px;
-    border-radius: 30px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: all 0.3s;
-    text-align: center;
-    min-height: 60px;
-}
-
-.game-btn:hover {
-    background: var(--soft-pink);
-    transform: scale(1.05);
-}
-    
-    @media (max-width: 480px) {
-        h1 {
-            font-size: 1.6em;
-        }
-        
-        .tab-btn {
-            padding: 10px 12px;
-            font-size: 0.8em;
-        }
-        
-        .btn {
-            padding: 10px 16px;
-            font-size: 0.9em;
-            min-width: 100px;
-        }
-        
-        .card {
-            padding: 15px;
         }
     }
     </style>
@@ -684,16 +510,17 @@
 
             <!-- Games Card -->
             <div class="mood-card">
-                <div class="mood-icon">🎮</div>
-                <h3>Play a Quick Game</h3>
-                <p>Distract yourself with something fun:</p>
-                 <div class="grid">
-                    <button class="game-btn" onclick="window.open('https://www.nytimes.com/games/wordle')">🔠 Wordle</button>
-                    <button class="game-btn" onclick="window.open('https://www.nytimes.com/games/sudoku')">🧩 Sudoku</button>
-                    <button class="game-btn" onclick="window.open('https://play2048.co')">🔢 2048</button>
-                    <button class="game-btn" onclick="window.open('https://skribbl.io')">✏️ Skribbl.io</button>
-                </div>
-            </div>
+        <div class="mood-icon">🎮</div>
+        <h3>Play a Quick Game</h3>
+        <p>Distract yourself with something fun:</p>
+        <div class="grid">
+            <button class="btn" onclick="window.open('https://www.nytimes.com/games/wordle')">🔠 Wordle</button>
+            <button class="btn" onclick="window.open('https://www.nytimes.com/games/sudoku')">🧩 Sudoku</button>
+            <button class="btn" onclick="window.open('https://play2048.co')">🔢 2048</button>
+            <button class="btn" onclick="window.open('https://skribbl.io')">✏️ Skribbl.io</button>
+        </div>
+    </div>
+
         
         <div class="slider-container">
             <label for="mood">Current Mood:</label>
