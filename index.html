@@ -15,6 +15,8 @@
         --text-medium: #444444;
         --text-light: #666666;
         --accent-color: #000000;
+        --hover-color: #f0f0f0;
+        --active-color: #e0e0e0;
     }
     
     body {
@@ -66,36 +68,37 @@
     /* Tabs */
     .tabs {
         display: flex;
+        flex-wrap: wrap;
         background-color: var(--bg-white);
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
         margin-bottom: 20px;
         border-bottom: 1px solid var(--border-gray);
-        scrollbar-width: none;
-    }
-    
-    .tabs::-webkit-scrollbar {
-        display: none;
+        gap: 4px;
     }
     
     .tab-btn {
-        flex: 0 0 auto;
-        padding: 12px 16px;
+        flex: 1 0 auto;
+        padding: 10px 12px;
         text-align: center;
         background-color: transparent;
         border: none;
         cursor: pointer;
-        font-size: 0.9em;
+        font-size: 0.85em;
         font-weight: 500;
         color: var(--text-light);
         transition: all 0.2s ease;
         position: relative;
         white-space: nowrap;
+        min-width: 60px;
+    }
+    
+    .tab-btn:hover {
+        background-color: var(--hover-color);
     }
     
     .tab-btn.active {
         color: var(--text-dark);
         font-weight: 600;
+        background-color: var(--active-color);
     }
     
     .tab-btn.active::after {
@@ -154,11 +157,6 @@
         transform: translateY(-2px);
     }
     
-    .mood-icon {
-        font-size: 2rem;
-        margin-bottom: 10px;
-    }
-    
     .subtitle {
         color: var(--text-light);
         margin-bottom: 20px;
@@ -182,7 +180,7 @@
     }
     
     .btn:hover {
-        background-color: var(--bg-gray);
+        background-color: var(--hover-color);
     }
     
     /* Form Elements */
@@ -231,22 +229,28 @@
         .grid {
             grid-template-columns: 1fr;
         }
+        
+        .tab-btn {
+            padding: 8px 6px;
+            font-size: 0.8em;
+            min-width: 50px;
+        }
     }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Wellness Tracker </h1>
+            <h1>Wellness Tracker</h1>
         </header>
         
         <div class="tabs">
-            <button class="tab-btn active" onclick="openTab(event, 'dashboard')">🌼 Dashboard</button>
-            <button class="tab-btn" onclick="openTab(event, 'health-info')">📚 Health Info</button>
-            <button class="tab-btn" onclick="openTab(event, 'daily-tracker')">📝 Daily Tracker</button>
-            <button class="tab-btn" onclick="openTab(event, 'analytics')">📊 Analytics</button>
-            <button class="tab-btn" onclick="openTab(event, 'low-mood')">🌈 Mood Boost</button>
-            <button class="tab-btn" onclick="openTab(event, 'recommendations')">💡 Recommendations</button>
+            <button class="tab-btn active" onclick="openTab(event, 'dashboard')">Dashboard</button>
+            <button class="tab-btn" onclick="openTab(event, 'health-info')">Health Info</button>
+            <button class="tab-btn" onclick="openTab(event, 'daily-tracker')">Daily Tracker</button>
+            <button class="tab-btn" onclick="openTab(event, 'analytics')">Analytics</button>
+            <button class="tab-btn" onclick="openTab(event, 'low-mood')">Mood Boost</button>
+            <button class="tab-btn" onclick="openTab(event, 'recommendations')">Recommendations</button>
         </div>
         
         <!-- Dashboard Tab -->
@@ -474,22 +478,21 @@
         
         <!-- Low Mood Tab -->
         <div id="low-mood" class="tab-content">
-            <h2>🌈 Mood Boosters</h2>
+            <h2>Mood Boosters</h2>
             <p class="subtitle">When you're feeling down, try one of these uplifting activities:</p>
             
             <!-- Music Card -->
             <div class="mood-card">
-                <div class="mood-icon">🎵</div>
                 <h3>Listen to Uplifting Playlists</h3>
                 <p>Music can instantly boost your mood. Try these curated playlists:</p>
                 <div class="grid">
-                    <div class="playlist-card">
-                        <h4>🌿 Chill Vibes</h4>
+                    <div class="card">
+                        <h4>Chill Vibes</h4>
                         <p>Relaxing tunes to calm your mind</p>
                         <button class="btn" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1DX4WYpdgoIcn6')">Open Playlist</button>
                     </div>
-                    <div class="playlist-card">
-                        <h4>☀️ Happy Beats</h4>
+                    <div class="card">
+                        <h4>Happy Beats</h4>
                         <p>Upbeat songs to lift your spirits</p>
                         <button class="btn" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1DXdPec7aLTmlC')">Open Playlist</button>
                     </div>
@@ -498,41 +501,25 @@
 
             <!-- Journaling Card -->
             <div class="mood-card">
-                <div class="mood-icon">✏️</div>
                 <h3>Journal Your Thoughts</h3>
                 <p>Writing down your feelings can help process them:</p>
                 <textarea class="journal-entry" placeholder="How are you feeling today? What's on your mind?..."></textarea>
                 <div class="btn-group">
-                    <button class="btn" onclick="saveJournalEntry()">💾 Save Entry</button>
-                    <button class="btn btn-outline" onclick="clearJournalEntry()">🗑️ Clear</button>
+                    <button class="btn" onclick="saveJournalEntry()">Save Entry</button>
+                    <button class="btn" onclick="clearJournalEntry()">Clear</button>
                 </div>
             </div>
 
             <!-- Games Card -->
             <div class="mood-card">
-        <div class="mood-icon">🎮</div>
-        <h3>Play a Quick Game</h3>
-        <p>Distract yourself with something fun:</p>
-        <div class="grid">
-            <button class="btn" onclick="window.open('https://www.nytimes.com/games/wordle')">🔠 Wordle</button>
-            <button class="btn" onclick="window.open('https://www.nytimes.com/games/sudoku')">🧩 Sudoku</button>
-            <button class="btn" onclick="window.open('https://play2048.co')">🔢 2048</button>
-            <button class="btn" onclick="window.open('https://skribbl.io')">✏️ Skribbl.io</button>
-        </div>
-    </div>
-
-        
-        <div class="slider-container">
-            <label for="mood">Current Mood:</label>
-            <div class="slider-wrapper">
-                <span>😞</span>
-                <input type="range" id="mood" min="1" max="10" value="5">
-                <span>😊</span>
-                <span class="slider-value" id="mood-value">5</span>
-            </div>
-            <div class="emoji-scale">
-                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
-                <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+                <h3>Play a Quick Game</h3>
+                <p>Distract yourself with something fun:</p>
+                <div class="grid">
+                    <button class="btn" onclick="window.open('https://www.nytimes.com/games/wordle')">Wordle</button>
+                    <button class="btn" onclick="window.open('https://www.nytimes.com/games/sudoku')">Sudoku</button>
+                    <button class="btn" onclick="window.open('https://play2048.co')">2048</button>
+                    <button class="btn" onclick="window.open('https://skribbl.io')">Skribbl.io</button>
+                </div>
             </div>
         </div>
         
@@ -542,7 +529,9 @@
             
             <div class="card">
                 <h3>Based on your data:</h3>
-                <div id="personal-recs"></div>
+                <div id="personal-recs">
+                    <p>Complete some tracking data to get personalized recommendations.</p>
+                </div>
             </div>
             
             <div class="grid">
@@ -571,7 +560,7 @@
                     <ul>
                         <li>Engage in favorite wellness activities</li>
                         <li>Connect with friends or loved ones</li>
-                        <li>Try the "Low Mood Helpers" tab</li>
+                        <li>Try the "Mood Boost" tab</li>
                         <li>Consider Vitamin D supplements</li>
                     </ul>
                 </div>
@@ -777,16 +766,16 @@
                         {
                             label: 'Mood (1-10)',
                             data: sortedData.map(entry => entry.mood),
-                            borderColor: '#F3D0D7',
-                            backgroundColor: 'rgba(243, 208, 215, 0.1)',
+                            borderColor: '#888',
+                            backgroundColor: 'rgba(200, 200, 200, 0.1)',
                             tension: 0.3,
                             fill: true
                         },
                         {
                             label: 'Energy (1-10)',
                             data: sortedData.map(entry => entry.energy),
-                            borderColor: '#FFEFEF',
-                            backgroundColor: 'rgba(255, 239, 239, 0.1)',
+                            borderColor: '#555',
+                            backgroundColor: 'rgba(150, 150, 150, 0.1)',
                             tension: 0.3,
                             fill: true
                         }
@@ -814,8 +803,8 @@
                     datasets: [{
                         label: 'Water (glasses)',
                         data: sortedData.map(entry => entry.water),
-                        backgroundColor: 'rgba(240, 235, 227, 0.7)',
-                        borderColor: 'rgba(240, 235, 227, 1)',
+                        backgroundColor: 'rgba(150, 150, 150, 0.7)',
+                        borderColor: 'rgba(100, 100, 100, 1)',
                         borderWidth: 1
                     }]
                 },
@@ -844,9 +833,9 @@
                             sortedData.filter(entry => entry.ironFood !== 'Yes' && entry.pcosFood !== 'Yes').length
                         ],
                         backgroundColor: [
-                            '#F3D0D7',
-                            '#FFEFEF',
-                            '#F0EBE3'
+                            '#aaa',
+                            '#ddd',
+                            '#888'
                         ]
                     }]
                 },
@@ -872,8 +861,8 @@
                     datasets: [{
                         data: Object.values(wellnessCounts),
                         backgroundColor: [
-                            '#F6F5F2', '#F0EBE3', '#F3D0D7', '#FFEFEF', 
-                            '#E8D5C5', '#D4A5A5', '#A2C5BF', '#CDD4D8'
+                            '#f0f0f0', '#e0e0e0', '#d0d0d0', '#c0c0c0', 
+                            '#b0b0b0', '#a0a0a0', '#909090', '#808080'
                         ]
                     }]
                 },
@@ -952,57 +941,6 @@
             recs += '</ul>';
             
             document.getElementById('personal-recs').innerHTML = recs;
-        }
-        
-        // Breathing exercise
-        let breathInterval;
-        let breathPhase = 'in'; // 'in', 'hold', 'out'
-        let breathCount = 4;
-        
-        function startBreathing() {
-            const btn = document.getElementById('breath-btn');
-            if(btn.textContent === 'Start Breathing Exercise') {
-                btn.textContent = 'Stop Exercise';
-                breathPhase = 'in';
-                breathCount = 4;
-                updateBreathDisplay();
-                breathInterval = setInterval(breathTimer, 1000);
-            } else {
-                btn.textContent = 'Start Breathing Exercise';
-                clearInterval(breathInterval);
-                document.getElementById('breath-text').textContent = 'Breathe in... (4 seconds)';
-                document.getElementById('breath-timer').textContent = '4';
-            }
-        }
-        
-        function breathTimer() {
-            breathCount--;
-            
-            if(breathCount <= 0) {
-                switch(breathPhase) {
-                    case 'in':
-                        breathPhase = 'hold';
-                        breathCount = 4;
-                        document.getElementById('breath-text').textContent = 'Hold... (4 seconds)';
-                        break;
-                    case 'hold':
-                        breathPhase = 'out';
-                        breathCount = 6;
-                        document.getElementById('breath-text').textContent = 'Breathe out... (6 seconds)';
-                        break;
-                    case 'out':
-                        breathPhase = 'in';
-                        breathCount = 4;
-                        document.getElementById('breath-text').textContent = 'Breathe in... (4 seconds)';
-                        break;
-                }
-            }
-            
-            document.getElementById('breath-timer').textContent = breathCount;
-        }
-        
-        function updateBreathDisplay() {
-            document.getElementById('breath-timer').textContent = breathCount;
         }
         
         // Journal functions
