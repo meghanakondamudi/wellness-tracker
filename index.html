@@ -170,6 +170,68 @@
         transition: all 0.3s ease;
         border: 1px solid var(--light-gray);
     }
+        /* Mood Boost Cards */
+.mood-card {
+  background: rgba(137, 172, 198, 0.1);
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 25px;
+  border: 1px dashed var(--pale-blue);
+  transition: transform 0.3s ease;
+}
+
+.mood-card:hover {
+  transform: translateY(-3px);
+}
+
+.mood-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: var(--text-light);
+  margin-bottom: 20px;
+}
+
+/* Playlist Cards */
+.playlist-card {
+  background: var(--white);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid var(--light-gray);
+}
+
+/* Game Buttons */
+.game-btn {
+  background: var(--deep-teal);
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.game-btn:hover {
+  background: var(--soft-blue);
+  transform: scale(1.05);
+}
+
+/* Button Group */
+.btn-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--deep-teal);
+  color: var(--deep-teal);
+}
     
     /* Touch-Friendly Buttons */
     .btn {
@@ -557,86 +619,53 @@
         </div>
         
         <!-- Low Mood Tab -->
-        <div id="low-mood" class="tab-content">
-            <h2>🌸 Low Mood Helpers 🌸</h2>
-            <p>When you're feeling down, try one of these activities:</p>
-            
-            <div class="mood-activity">
-                <h3>🎵 Listen to a Uplifting Playlist</h3>
-                <p>Music can instantly boost your mood. Try these curated playlists:</p>
-                
-                <div class="playlist-container">
-                    <div class="playlist-card">
-                        <h4>Chill Vibes</h4>
-                        <p>Relaxing tunes to calm your mind</p>
-                        <button class="btn" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1DX4WYpdgoIcn6')">Open Playlist</button>
-                    </div>
-                    
-                    <div class="playlist-card">
-                        <h4>Happy Beats</h4>
-                        <p>Upbeat songs to lift your spirits</p>
-                        <button class="btn" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1DXdPec7aLTmlC')">Open Playlist</button>
-                    </div>
-                    
-                    <div class="playlist-card">
-                        <h4>Nature Sounds</h4>
-                        <p>Calming nature for stress relief</p>
-                        <button class="btn" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1DWZqd5JICZI0u')">Open Playlist</button>
-                    </div>
-                    
-                    <div class="playlist-card">
-                        <h4>Feel Good Pop</h4>
-                        <p>Popular songs to sing along to</p>
-                        <button class="btn" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1DX3rxVfibe1L0')">Open Playlist</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mood-activity">
-                <h3>✏️ Journal Your Thoughts</h3>
-                <p>Writing down your feelings can help process them:</p>
-                <textarea class="journal-entry" placeholder="How are you feeling today? What's on your mind?"></textarea>
-                <button class="btn" onclick="saveJournalEntry()">Save Journal Entry</button>
-                <button class="btn" onclick="clearJournalEntry()">Clear</button>
-            </div>
-            
-            <div class="mood-activity">
-                <h3>🎮 Play a Quick Game</h3>
-                <p>Distract yourself with something fun:</p>
-                
-                <div class="game-container">
-                    <button class="game-btn" onclick="window.open('https://www.nytimes.com/games/wordle')">Play Wordle</button>
-                    <button class="game-btn" onclick="window.open('https://quickdraw.withgoogle.com')">Quick Draw</button>
-                    <button class="game-btn" onclick="window.open('https://www.crazygames.com/game/sushi-slice')">Sushi Slice</button>
-                    <button class="game-btn" onclick="window.open('https://www.crazygames.com/game/2048')">2048 Puzzle</button>
-                </div>
-            </div>
-            
-            <div class="mood-activity">
-                <h3>🧘‍♀️ Guided Relaxation</h3>
-                <p>Take 5 minutes to reset:</p>
-                
-                <div class="grid">
-                    <div class="card">
-                        <h4>Breathing Exercise</h4>
-                        <p>Follow along with this simple pattern:</p>
-                        <div style="text-align: center; font-size: 1.5em; margin: 20px 0;">
-                            <div id="breath-text">Breathe in... (4 seconds)</div>
-                            <div id="breath-timer" style="font-size: 2em; color: #FF9AA2;">4</div>
-                        </div>
-                        <button class="btn" id="breath-btn" onclick="startBreathing()">Start Breathing Exercise</button>
-                    </div>
-                    
-                    <div class="card">
-                        <h4>Quick Meditation</h4>
-                        <p>Listen to a short guided meditation:</p>
-                        <button class="btn" onclick="window.open('https://www.youtube.com/watch?v=inpok4MKVLM')">5-Minute Meditation</button>
-                        <button class="btn" onclick="window.open('https://www.youtube.com/watch?v=cyUzUY5_CM4')">Body Scan</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="slider-container">
+        <!-- Low Mood Tab -->
+<div id="low-mood" class="tab-content">
+  <h2>🌈 Mood Boosters</h2>
+  <p class="subtitle">When you're feeling down, try one of these uplifting activities:</p>
+  
+  <!-- Music Card -->
+  <div class="mood-card">
+    <div class="mood-icon">🎵</div>
+    <h3>Listen to Uplifting Playlists</h3>
+    <p>Music can instantly boost your mood. Try these curated playlists:</p>
+    <div class="grid">
+      <div class="playlist-card">
+        <h4>🌿 Chill Vibes</h4>
+        <p>Relaxing tunes to calm your mind</p>
+        <button class="btn" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1DX4WYpdgoIcn6')">Open Playlist</button>
+      </div>
+      <div class="playlist-card">
+        <h4>☀️ Happy Beats</h4>
+        <p>Upbeat songs to lift your spirits</p>
+        <button class="btn" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1DXdPec7aLTmlC')">Open Playlist</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Journaling Card -->
+  <div class="mood-card">
+    <div class="mood-icon">✏️</div>
+    <h3>Journal Your Thoughts</h3>
+    <p>Writing down your feelings can help process them:</p>
+    <textarea class="journal-entry" placeholder="How are you feeling today? What's on your mind?..."></textarea>
+    <div class="btn-group">
+      <button class="btn" onclick="saveJournalEntry()">💾 Save Entry</button>
+      <button class="btn btn-outline" onclick="clearJournalEntry()">🗑️ Clear</button>
+    </div>
+  </div>
+
+  <!-- Games Card -->
+  <div class="mood-card">
+    <div class="mood-icon">🎮</div>
+    <h3>Play a Quick Game</h3>
+    <p>Distract yourself with something fun:</p>
+    <div class="grid">
+      <button class="game-btn" onclick="window.open('https://www.nytimes.com/games/wordle')">🔠 Wordle</button>
+      <button class="game-btn" onclick="window.open('https://quickdraw.withgoogle.com')">🎨 Quick Draw</button>
+    </div>
+  </div>
+</div>        <div class="slider-container">
     <label for="mood">Current Mood:</label>
     <div class="slider-wrapper">
         <span>😞</span>
