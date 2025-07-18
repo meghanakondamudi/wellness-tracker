@@ -1,0 +1,366 @@
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+from datetime import date, timedelta
+
+# Load data (in a real app, you'd load the Excel file)
+# For this example, I'll recreate the data structures
+
+def load_data():
+    # Create data structures from the Excel content
+    data = {
+        "Low Hb Info": {
+            "What is Low Hemoglobin (Hb)?": "Low Hb means fewer red blood cells or low hemoglobin levels in blood, leading to anemia.",
+            "Common Symptoms": "Fatigue, weakness, pale skin, shortness of breath, dizziness, cold hands/feet.",
+            "Causes": "Iron deficiency, vitamin B12/folate deficiency, chronic disease, blood loss.",
+            "Risks if Untreated": "Heart problems, pregnancy complications, severe fatigue, organ damage.",
+            "Tests to Request": "CBC, Iron studies (ferritin, TIBC), B12, Folate, Reticulocyte count."
+        },
+        "PCOS Info": {
+            "What is PCOS?": "A hormonal disorder with irregular ovulation, excess androgens, and sometimes ovarian cysts.",
+            "Diagnostic Criteria": "2 of 3: Irregular periods, High androgens (acne/hair), Polycystic ovaries on ultrasound.",
+            "Common Symptoms": "Irregular periods, acne, hair thinning or excess growth, weight gain, fertility issues, mood swings.",
+            "Root Causes": "Insulin resistance, inflammation, genetics, hormonal imbalance (LH/FSH).",
+            "Associated Risks": "Type 2 diabetes, high cholesterol, infertility, anxiety & depression.",
+            "Tests to Request": "Testosterone (free/total), LH & FSH, fasting insulin, ultrasound, thyroid panel."
+        },
+        "Stress & Solutions": {
+            "Work overload": "Set boundaries, prioritize tasks, take breaks.",
+            "Family pressure": "Open communication, seek support, therapy.",
+            "Health concerns": "Regular check-ups, take action, self-care.",
+            "Financial instability": "Budgeting, financial planning, seek help.",
+            "Loneliness": "Connect with others, join a group, therapy.",
+            "Uncertainty about future": "Mindfulness, planning, journaling, talk it out."
+        },
+        "Foods & Benefits": {
+            "Spinach": "High in iron, helps raise Hb.",
+            "Lentils": "Rich in iron and protein, stabilizes blood sugar.",
+            "Pumpkin seeds": "Iron and zinc-rich, supports Hb and hormones.",
+            "Eggs": "Protein + B12, supports red blood cell formation.",
+            "Berries": "Antioxidants, reduces inflammation.",
+            "Oats": "Low GI, supports insulin sensitivity.",
+            "Fatty fish (salmon)": "Omega-3s, reduces inflammation.",
+            "Nuts": "Magnesium, healthy fats, supports hormones.",
+            "Broccoli": "Iron + vitamin C combo, boosts absorption.",
+            "Quinoa": "Protein + fiber, stabilizes insulin."
+        },
+        "Supplements": {
+            "Iron (ferrous sulfate)": "Raises hemoglobin and treats anemia.",
+            "Vitamin B12": "Essential for red blood cell production.",
+            "Folic Acid": "Supports Hb and cell function.",
+            "Vitamin D": "Improves mood, immunity, hormonal balance.",
+            "Inositol (Myo + D-Chiro)": "Improves insulin sensitivity in PCOS.",
+            "Magnesium": "Reduces stress, improves insulin response.",
+            "Zinc": "Supports immune system and hormones.",
+            "Omega-3 (Fish oil)": "Anti-inflammatory, supports heart and hormone health."
+        },
+        "Wellness": [
+            "Journaling", "Warm bath", "Long walks in nature",
+            "Phone calls with loved ones", "Deep breathing",
+            "Listening to music", "Stretching/Yoga",
+            "Reading a comforting book", "Spending time in sunlight",
+            "Digital detox"
+        ]
+    }
+    return data
+
+def initialize_tracker():
+    today = date.today()
+    dates = [today + timedelta(days=i) for i in range(28)]
+    tracker = pd.DataFrame({
+        "Date": dates,
+        "Day": [f"Day {i+1}" for i in range(28)],
+        "Mood (1-10)": np.nan,
+        "Energy Level (1-10)": np.nan,
+        "Symptoms Noticed": "",
+        "Period (Yes/No)": "",
+        "Meals Taken": "",
+        "Iron-Rich Food (Yes/No)": "",
+        "PCOS-Friendly Food (Yes/No)": "",
+        "Supplements Taken": "",
+        "Exercise Done": "",
+        "Wellness Activity Done": "",
+        "Water Intake (glasses)": np.nan,
+        "Notes/Reflections": ""
+    })
+    return tracker
+
+def main():
+    st.set_page_config(page_title="PCOS & Low Hb Wellness Tracker", layout="wide")
+    data = load_data()
+    
+    # Sidebar navigation
+    st.sidebar.title("Navigation")
+    page = st.sidebar.radio("Go to", [
+        "Dashboard", 
+        "Health Information", 
+        "Daily Tracker", 
+        "Progress Analytics",
+        "Personalized Recommendations"
+    ])
+    
+    # Initialize session state for tracker if not exists
+    if 'tracker' not in st.session_state:
+        st.session_state.tracker = initialize_tracker()
+    
+    if page == "Dashboard":
+        st.title("PCOS & Low Hemoglobin Wellness Tracker")
+        st.image("https://images.unsplash.com/photo-1498837167922-ddd27525d352?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80", 
+                 width=700, caption="Track your health journey")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.subheader("Quick Stats")
+            if not st.session_state.tracker.empty:
+                avg_mood = st.session_state.tracker["Mood (1-10)"].mean()
+                avg_energy = st.session_state.tracker["Energy Level (1-10)"].mean()
+                avg_water = st.session_state.tracker["Water Intake (glasses)"].mean()
+                
+                st.metric("Average Mood", f"{avg_mood:.1f}/10" if not np.isnan(avg_mood) else "No data")
+                st.metric("Average Energy", f"{avg_energy:.1f}/10" if not np.isnan(avg_energy) else "No data")
+                st.metric("Avg Water Intake", f"{avg_water:.1f} glasses" if not np.isnan(avg_water) else "No data")
+        
+        with col2:
+            st.subheader("Today's Quick Entry")
+            with st.form("quick_entry"):
+                today_mood = st.slider("Mood (1-10)", 1, 10)
+                today_energy = st.slider("Energy Level (1-10)", 1, 10)
+                today_water = st.number_input("Water Intake (glasses)", 0, 15)
+                submitted = st.form_submit_button("Save Today's Data")
+                
+                if submitted:
+                    today = date.today()
+                    if today in st.session_state.tracker["Date"].values:
+                        idx = st.session_state.tracker[st.session_state.tracker["Date"] == today].index[0]
+                        st.session_state.tracker.at[idx, "Mood (1-10)"] = today_mood
+                        st.session_state.tracker.at[idx, "Energy Level (1-10)"] = today_energy
+                        st.session_state.tracker.at[idx, "Water Intake (glasses)"] = today_water
+                        st.success("Data saved for today!")
+    
+    elif page == "Health Information":
+        st.title("Health Information Hub")
+        
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
+            "Low Hemoglobin", "PCOS", "Stress Solutions", 
+            "Foods & Benefits", "Supplements"
+        ])
+        
+        with tab1:
+            st.subheader("Low Hemoglobin Information")
+            for key, value in data["Low Hb Info"].items():
+                with st.expander(key):
+                    st.write(value)
+        
+        with tab2:
+            st.subheader("PCOS Information")
+            for key, value in data["PCOS Info"].items():
+                with st.expander(key):
+                    st.write(value)
+        
+        with tab3:
+            st.subheader("Stress Management Solutions")
+            for key, value in data["Stress & Solutions"].items():
+                with st.expander(key):
+                    st.write(value)
+        
+        with tab4:
+            st.subheader("Foods and Their Benefits")
+            for food, benefit in data["Foods & Benefits"].items():
+                st.markdown(f"**{food}**: {benefit}")
+        
+        with tab5:
+            st.subheader("Supplement Guide")
+            for supplement, benefit in data["Supplements"].items():
+                st.markdown(f"**{supplement}**: {benefit}")
+    
+    elif page == "Daily Tracker":
+        st.title("Daily Wellness Tracker")
+        
+        # Date selector
+        selected_date = st.date_input("Select date to log", date.today())
+        
+        # Find the corresponding day in the tracker
+        if selected_date in st.session_state.tracker["Date"].values:
+            day_idx = st.session_state.tracker[st.session_state.tracker["Date"] == selected_date].index[0]
+            day_data = st.session_state.tracker.loc[day_idx].to_dict()
+        else:
+            day_data = {}
+            st.warning("Selected date is outside the 4-week tracking period")
+        
+        with st.form("daily_entry"):
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                mood = st.slider("Mood (1-10)", 1, 10, 
+                               int(day_data.get("Mood (1-10)", 5)))
+                energy = st.slider("Energy Level (1-10)", 1, 10, 
+                                  int(day_data.get("Energy Level (1-10)", 5)))
+                symptoms = st.text_area("Symptoms Noticed", 
+                                      day_data.get("Symptoms Noticed", ""))
+                period = st.selectbox("Period Today?", 
+                                    ["", "Yes", "No"], 
+                                    index=["", "Yes", "No"].index(day_data.get("Period (Yes/No)", "")))
+            
+            with col2:
+                meals = st.text_input("Meals Taken", 
+                                    day_data.get("Meals Taken", ""))
+                iron_food = st.selectbox("Iron-Rich Food Today?", 
+                                       ["", "Yes", "No"], 
+                                       index=["", "Yes", "No"].index(day_data.get("Iron-Rich Food (Yes/No)", "")))
+                pcos_food = st.selectbox("PCOS-Friendly Food Today?", 
+                                       ["", "Yes", "No"], 
+                                       index=["", "Yes", "No"].index(day_data.get("PCOS-Friendly Food (Yes/No)", "")))
+                supplements = st.text_input("Supplements Taken", 
+                                          day_data.get("Supplements Taken", ""))
+                exercise = st.text_input("Exercise Done", 
+                                       day_data.get("Exercise Done", ""))
+                wellness = st.selectbox("Wellness Activity", 
+                                      [""] + data["Wellness"], 
+                                      index=([""] + data["Wellness"]).index(day_data.get("Wellness Activity Done", "")))
+                water = st.number_input("Water Intake (glasses)", 0, 15, 
+                                      int(day_data.get("Water Intake (glasses)", 8)))
+                notes = st.text_area("Notes/Reflections", 
+                                   day_data.get("Notes/Reflections", ""))
+            
+            submitted = st.form_submit_button("Save Entry")
+            
+            if submitted and selected_date in st.session_state.tracker["Date"].values:
+                idx = st.session_state.tracker[st.session_state.tracker["Date"] == selected_date].index[0]
+                st.session_state.tracker.at[idx, "Mood (1-10)"] = mood
+                st.session_state.tracker.at[idx, "Energy Level (1-10)"] = energy
+                st.session_state.tracker.at[idx, "Symptoms Noticed"] = symptoms
+                st.session_state.tracker.at[idx, "Period (Yes/No)"] = period
+                st.session_state.tracker.at[idx, "Meals Taken"] = meals
+                st.session_state.tracker.at[idx, "Iron-Rich Food (Yes/No)"] = iron_food
+                st.session_state.tracker.at[idx, "PCOS-Friendly Food (Yes/No)"] = pcos_food
+                st.session_state.tracker.at[idx, "Supplements Taken"] = supplements
+                st.session_state.tracker.at[idx, "Exercise Done"] = exercise
+                st.session_state.tracker.at[idx, "Wellness Activity Done"] = wellness
+                st.session_state.tracker.at[idx, "Water Intake (glasses)"] = water
+                st.session_state.tracker.at[idx, "Notes/Reflections"] = notes
+                
+                st.success("Daily entry saved!")
+    
+    elif page == "Progress Analytics":
+        st.title("Your Progress Analytics")
+        
+        if not st.session_state.tracker.empty:
+            # Mood and Energy Trends
+            fig, ax = plt.subplots(figsize=(10, 4))
+            ax.plot(st.session_state.tracker["Day"], 
+                    st.session_state.tracker["Mood (1-10)"], 
+                    label="Mood", marker="o")
+            ax.plot(st.session_state.tracker["Day"], 
+                    st.session_state.tracker["Energy Level (1-10)"], 
+                    label="Energy", marker="o")
+            ax.set_title("Mood and Energy Trends")
+            ax.set_ylabel("Score (1-10)")
+            ax.legend()
+            ax.grid(True)
+            st.pyplot(fig)
+            
+            # Water Intake
+            fig2, ax2 = plt.subplots(figsize=(10, 4))
+            ax2.bar(st.session_state.tracker["Day"], 
+                   st.session_state.tracker["Water Intake (glasses)"])
+            ax2.set_title("Water Intake")
+            ax2.set_ylabel("Glasses per day")
+            st.pyplot(fig2)
+            
+            # Iron and PCOS food compliance
+            iron_days = st.session_state.tracker["Iron-Rich Food (Yes/No)"] == "Yes"
+            pcos_days = st.session_state.tracker["PCOS-Friendly Food (Yes/No)"] == "Yes"
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Days with Iron-Rich Foods", f"{iron_days.sum()}/28")
+            with col2:
+                st.metric("Days with PCOS-Friendly Foods", f"{pcos_days.sum()}/28")
+            
+            # Wellness activities frequency
+            wellness_counts = st.session_state.tracker["Wellness Activity Done"].value_counts()
+            if not wellness_counts.empty:
+                fig3, ax3 = plt.subplots(figsize=(10, 4))
+                wellness_counts.plot(kind="bar", ax=ax3)
+                ax3.set_title("Wellness Activities Frequency")
+                st.pyplot(fig3)
+        else:
+            st.warning("No tracking data available yet")
+    
+    elif page == "Personalized Recommendations":
+        st.title("Personalized Recommendations")
+        
+        if not st.session_state.tracker.empty:
+            # Analyze mood and energy patterns
+            avg_mood = st.session_state.tracker["Mood (1-10)"].mean()
+            avg_energy = st.session_state.tracker["Energy Level (1-10)"].mean()
+            
+            # Check for common symptoms
+            symptoms_text = " ".join(st.session_state.tracker["Symptoms Noticed"].dropna())
+            common_symptoms = {
+                "fatigue": symptoms_text.lower().count("fatigue"),
+                "weakness": symptoms_text.lower().count("weakness"),
+                "dizziness": symptoms_text.lower().count("dizziness"),
+                "irregular": symptoms_text.lower().count("irregular"),
+                "acne": symptoms_text.lower().count("acne"),
+                "hair": symptoms_text.lower().count("hair")
+            }
+            
+            # Generate recommendations based on data
+            st.subheader("Based on your data:")
+            
+            if avg_mood < 5 or avg_energy < 5:
+                st.warning("Your mood and energy levels seem consistently low")
+                st.markdown("""
+                **Recommendations:**
+                - Consider increasing iron-rich foods like spinach, lentils, and pumpkin seeds
+                - Try the supplements: Iron, Vitamin B12, and Magnesium
+                - Engage in these wellness activities: Long walks in nature, Spending time in sunlight
+                """)
+            
+            if common_symptoms["fatigue"] > 5 or common_symptoms["weakness"] > 5:
+                st.warning("You're reporting frequent fatigue/weakness")
+                st.markdown("""
+                **Recommendations:**
+                - Get your hemoglobin levels checked (CBC test)
+                - Ensure you're eating iron-rich foods daily
+                - Consider short naps or rest periods during the day
+                """)
+            
+            if common_symptoms["irregular"] > 3 or common_symptoms["acne"] > 3 or common_symptoms["hair"] > 3:
+                st.warning("You're showing potential PCOS symptoms")
+                st.markdown("""
+                **Recommendations:**
+                - Focus on PCOS-friendly foods like fatty fish, nuts, and quinoa
+                - Consider supplements: Inositol, Omega-3, and Zinc
+                - Try yoga and stress-reduction techniques
+                - Consult with an endocrinologist if symptoms persist
+                """)
+            
+            # Check water intake
+            avg_water = st.session_state.tracker["Water Intake (glasses)"].mean()
+            if avg_water < 6:
+                st.warning("Your water intake seems low")
+                st.markdown("""
+                **Recommendations:**
+                - Aim for at least 8 glasses of water daily
+                - Carry a water bottle with you
+                - Set hourly reminders to drink water
+                """)
+            
+            # Show most helpful wellness activities
+            if "Wellness Activity Done" in st.session_state.tracker.columns:
+                wellness_corr = st.session_state.tracker[["Wellness Activity Done", "Mood (1-10)", "Energy Level (1-10)"]]
+                wellness_corr = wellness_corr.groupby("Wellness Activity Done").mean()
+                if not wellness_corr.empty:
+                    top_wellness = wellness_corr.mean(axis=1).sort_values(ascending=False).head(3)
+                    st.subheader("Your most effective wellness activities:")
+                    for activity, score in top_wellness.items():
+                        st.markdown(f"- **{activity}** (Avg mood+energy: {score:.1f}/10)")
+        else:
+            st.warning("Complete more tracking data to get personalized recommendations")
+
+if __name__ == "__main__":
+    main()
