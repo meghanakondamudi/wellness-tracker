@@ -1,366 +1,1037 @@
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-from datetime import date, timedelta
-
-# Load data (in a real app, you'd load the Excel file)
-# For this example, I'll recreate the data structures
-
-def load_data():
-    # Create data structures from the Excel content
-    data = {
-        "Low Hb Info": {
-            "What is Low Hemoglobin (Hb)?": "Low Hb means fewer red blood cells or low hemoglobin levels in blood, leading to anemia.",
-            "Common Symptoms": "Fatigue, weakness, pale skin, shortness of breath, dizziness, cold hands/feet.",
-            "Causes": "Iron deficiency, vitamin B12/folate deficiency, chronic disease, blood loss.",
-            "Risks if Untreated": "Heart problems, pregnancy complications, severe fatigue, organ damage.",
-            "Tests to Request": "CBC, Iron studies (ferritin, TIBC), B12, Folate, Reticulocyte count."
-        },
-        "PCOS Info": {
-            "What is PCOS?": "A hormonal disorder with irregular ovulation, excess androgens, and sometimes ovarian cysts.",
-            "Diagnostic Criteria": "2 of 3: Irregular periods, High androgens (acne/hair), Polycystic ovaries on ultrasound.",
-            "Common Symptoms": "Irregular periods, acne, hair thinning or excess growth, weight gain, fertility issues, mood swings.",
-            "Root Causes": "Insulin resistance, inflammation, genetics, hormonal imbalance (LH/FSH).",
-            "Associated Risks": "Type 2 diabetes, high cholesterol, infertility, anxiety & depression.",
-            "Tests to Request": "Testosterone (free/total), LH & FSH, fasting insulin, ultrasound, thyroid panel."
-        },
-        "Stress & Solutions": {
-            "Work overload": "Set boundaries, prioritize tasks, take breaks.",
-            "Family pressure": "Open communication, seek support, therapy.",
-            "Health concerns": "Regular check-ups, take action, self-care.",
-            "Financial instability": "Budgeting, financial planning, seek help.",
-            "Loneliness": "Connect with others, join a group, therapy.",
-            "Uncertainty about future": "Mindfulness, planning, journaling, talk it out."
-        },
-        "Foods & Benefits": {
-            "Spinach": "High in iron, helps raise Hb.",
-            "Lentils": "Rich in iron and protein, stabilizes blood sugar.",
-            "Pumpkin seeds": "Iron and zinc-rich, supports Hb and hormones.",
-            "Eggs": "Protein + B12, supports red blood cell formation.",
-            "Berries": "Antioxidants, reduces inflammation.",
-            "Oats": "Low GI, supports insulin sensitivity.",
-            "Fatty fish (salmon)": "Omega-3s, reduces inflammation.",
-            "Nuts": "Magnesium, healthy fats, supports hormones.",
-            "Broccoli": "Iron + vitamin C combo, boosts absorption.",
-            "Quinoa": "Protein + fiber, stabilizes insulin."
-        },
-        "Supplements": {
-            "Iron (ferrous sulfate)": "Raises hemoglobin and treats anemia.",
-            "Vitamin B12": "Essential for red blood cell production.",
-            "Folic Acid": "Supports Hb and cell function.",
-            "Vitamin D": "Improves mood, immunity, hormonal balance.",
-            "Inositol (Myo + D-Chiro)": "Improves insulin sensitivity in PCOS.",
-            "Magnesium": "Reduces stress, improves insulin response.",
-            "Zinc": "Supports immune system and hormones.",
-            "Omega-3 (Fish oil)": "Anti-inflammatory, supports heart and hormone health."
-        },
-        "Wellness": [
-            "Journaling", "Warm bath", "Long walks in nature",
-            "Phone calls with loved ones", "Deep breathing",
-            "Listening to music", "Stretching/Yoga",
-            "Reading a comforting book", "Spending time in sunlight",
-            "Digital detox"
-        ]
-    }
-    return data
-
-def initialize_tracker():
-    today = date.today()
-    dates = [today + timedelta(days=i) for i in range(28)]
-    tracker = pd.DataFrame({
-        "Date": dates,
-        "Day": [f"Day {i+1}" for i in range(28)],
-        "Mood (1-10)": np.nan,
-        "Energy Level (1-10)": np.nan,
-        "Symptoms Noticed": "",
-        "Period (Yes/No)": "",
-        "Meals Taken": "",
-        "Iron-Rich Food (Yes/No)": "",
-        "PCOS-Friendly Food (Yes/No)": "",
-        "Supplements Taken": "",
-        "Exercise Done": "",
-        "Wellness Activity Done": "",
-        "Water Intake (glasses)": np.nan,
-        "Notes/Reflections": ""
-    })
-    return tracker
-
-def main():
-    st.set_page_config(page_title="PCOS & Low Hb Wellness Tracker", layout="wide")
-    data = load_data()
-    
-    # Sidebar navigation
-    st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Go to", [
-        "Dashboard", 
-        "Health Information", 
-        "Daily Tracker", 
-        "Progress Analytics",
-        "Personalized Recommendations"
-    ])
-    
-    # Initialize session state for tracker if not exists
-    if 'tracker' not in st.session_state:
-        st.session_state.tracker = initialize_tracker()
-    
-    if page == "Dashboard":
-        st.title("PCOS & Low Hemoglobin Wellness Tracker")
-        st.image("https://images.unsplash.com/photo-1498837167922-ddd27525d352?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80", 
-                 width=700, caption="Track your health journey")
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCOS & Low Hb Wellness Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --pastel-pink: #FFD1DC;
+            --pastel-purple: #E6E6FA;
+            --pastel-blue: #B5EAD7;
+            --pastel-green: #C7F0DB;
+            --pastel-yellow: #FFFACD;
+            --pastel-peach: #FFDFD3;
+            --text-dark: #5D5D5D;
+            --text-light: #7F7F7F;
+        }
         
-        col1, col2 = st.columns(2)
+        body {
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+            background-color: #FFF9FB;
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
         
-        with col1:
-            st.subheader("Quick Stats")
-            if not st.session_state.tracker.empty:
-                avg_mood = st.session_state.tracker["Mood (1-10)"].mean()
-                avg_energy = st.session_state.tracker["Energy Level (1-10)"].mean()
-                avg_water = st.session_state.tracker["Water Intake (glasses)"].mean()
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--pastel-pink), var(--pastel-purple));
+            padding: 30px 0;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        h1 {
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+            margin: 0;
+            font-size: 2.5em;
+        }
+        
+        .tabs {
+            display: flex;
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background-color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn.active {
+            background-color: var(--pastel-blue);
+            color: var(--text-dark);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h3 {
+            color: var(--pastel-purple);
+            margin-top: 0;
+        }
+        
+        .btn {
+            background-color: var(--pastel-pink);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            background-color: var(--pastel-purple);
+            transform: scale(1.05);
+        }
+        
+        .mood-activity {
+            background-color: var(--pastel-yellow);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .mood-activity h3 {
+            color: #FF9AA2;
+        }
+        
+        .journal-entry {
+            width: 100%;
+            height: 150px;
+            border: 2px dashed var(--pastel-blue);
+            border-radius: 12px;
+            padding: 15px;
+            font-family: inherit;
+            margin-bottom: 15px;
+        }
+        
+        .game-container {
+            background-color: var(--pastel-peach);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .game-btn {
+            background-color: #FF9AA2;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+        }
+        
+        .game-btn:hover {
+            background-color: #FFB7B2;
+            transform: scale(1.05);
+        }
+        
+        .playlist-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .playlist-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: calc(50% - 15px);
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 768px) {
+            .playlist-card {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌸 PCOS & Low Hb Wellness Tracker 🌸</h1>
+        </header>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab(event, 'dashboard')">Dashboard</button>
+            <button class="tab-btn" onclick="openTab(event, 'health-info')">Health Info</button>
+            <button class="tab-btn" onclick="openTab(event, 'daily-tracker')">Daily Tracker</button>
+            <button class="tab-btn" onclick="openTab(event, 'analytics')">Analytics</button>
+            <button class="tab-btn" onclick="openTab(event, 'low-mood')">Low Mood</button>
+            <button class="tab-btn" onclick="openTab(event, 'recommendations')">Recommendations</button>
+        </div>
+        
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <h2>Your Wellness Dashboard</h2>
+            
+            <div class="grid">
+                <div class="card">
+                    <h3>Today's Quick Log</h3>
+                    <label for="mood">Mood (1-10):</label>
+                    <input type="range" id="mood" min="1" max="10" value="5">
+                    <span id="mood-value">5</span>
+                    
+                    <label for="energy">Energy Level (1-10):</label>
+                    <input type="range" id="energy" min="1" max="10" value="5">
+                    <span id="energy-value">5</span>
+                    
+                    <label for="water">Water Intake (glasses):</label>
+                    <input type="number" id="water" min="0" max="15" value="8">
+                    
+                    <button class="btn" onclick="saveQuickLog()">Save Today's Data</button>
+                </div>
                 
-                st.metric("Average Mood", f"{avg_mood:.1f}/10" if not np.isnan(avg_mood) else "No data")
-                st.metric("Average Energy", f"{avg_energy:.1f}/10" if not np.isnan(avg_energy) else "No data")
-                st.metric("Avg Water Intake", f"{avg_water:.1f} glasses" if not np.isnan(avg_water) else "No data")
-        
-        with col2:
-            st.subheader("Today's Quick Entry")
-            with st.form("quick_entry"):
-                today_mood = st.slider("Mood (1-10)", 1, 10)
-                today_energy = st.slider("Energy Level (1-10)", 1, 10)
-                today_water = st.number_input("Water Intake (glasses)", 0, 15)
-                submitted = st.form_submit_button("Save Today's Data")
+                <div class="card">
+                    <h3>Quick Stats</h3>
+                    <p><strong>Average Mood:</strong> <span id="avg-mood">-</span>/10</p>
+                    <p><strong>Average Energy:</strong> <span id="avg-energy">-</span>/10</p>
+                    <p><strong>Avg Water Intake:</strong> <span id="avg-water">-</span> glasses</p>
+                    <p><strong>Iron-Rich Days:</strong> <span id="iron-days">-</span>/28</p>
+                    <p><strong>PCOS-Friendly Days:</strong> <span id="pcos-days">-</span>/28</p>
+                </div>
                 
-                if submitted:
-                    today = date.today()
-                    if today in st.session_state.tracker["Date"].values:
-                        idx = st.session_state.tracker[st.session_state.tracker["Date"] == today].index[0]
-                        st.session_state.tracker.at[idx, "Mood (1-10)"] = today_mood
-                        st.session_state.tracker.at[idx, "Energy Level (1-10)"] = today_energy
-                        st.session_state.tracker.at[idx, "Water Intake (glasses)"] = today_water
-                        st.success("Data saved for today!")
-    
-    elif page == "Health Information":
-        st.title("Health Information Hub")
-        
-        tab1, tab2, tab3, tab4, tab5 = st.tabs([
-            "Low Hemoglobin", "PCOS", "Stress Solutions", 
-            "Foods & Benefits", "Supplements"
-        ])
-        
-        with tab1:
-            st.subheader("Low Hemoglobin Information")
-            for key, value in data["Low Hb Info"].items():
-                with st.expander(key):
-                    st.write(value)
-        
-        with tab2:
-            st.subheader("PCOS Information")
-            for key, value in data["PCOS Info"].items():
-                with st.expander(key):
-                    st.write(value)
-        
-        with tab3:
-            st.subheader("Stress Management Solutions")
-            for key, value in data["Stress & Solutions"].items():
-                with st.expander(key):
-                    st.write(value)
-        
-        with tab4:
-            st.subheader("Foods and Their Benefits")
-            for food, benefit in data["Foods & Benefits"].items():
-                st.markdown(f"**{food}**: {benefit}")
-        
-        with tab5:
-            st.subheader("Supplement Guide")
-            for supplement, benefit in data["Supplements"].items():
-                st.markdown(f"**{supplement}**: {benefit}")
-    
-    elif page == "Daily Tracker":
-        st.title("Daily Wellness Tracker")
-        
-        # Date selector
-        selected_date = st.date_input("Select date to log", date.today())
-        
-        # Find the corresponding day in the tracker
-        if selected_date in st.session_state.tracker["Date"].values:
-            day_idx = st.session_state.tracker[st.session_state.tracker["Date"] == selected_date].index[0]
-            day_data = st.session_state.tracker.loc[day_idx].to_dict()
-        else:
-            day_data = {}
-            st.warning("Selected date is outside the 4-week tracking period")
-        
-        with st.form("daily_entry"):
-            col1, col2 = st.columns(2)
+                <div class="card">
+                    <h3>Quick Links</h3>
+                    <button class="btn" onclick="openTab(event, 'daily-tracker')">Daily Tracker</button>
+                    <button class="btn" onclick="openTab(event, 'low-mood')">Low Mood Help</button>
+                    <button class="btn" onclick="openTab(event, 'recommendations')">Get Recommendations</button>
+                    <button class="btn" onclick="showAllData()">View All Data</button>
+                </div>
+            </div>
             
-            with col1:
-                mood = st.slider("Mood (1-10)", 1, 10, 
-                               int(day_data.get("Mood (1-10)", 5)))
-                energy = st.slider("Energy Level (1-10)", 1, 10, 
-                                  int(day_data.get("Energy Level (1-10)", 5)))
-                symptoms = st.text_area("Symptoms Noticed", 
-                                      day_data.get("Symptoms Noticed", ""))
-                period = st.selectbox("Period Today?", 
-                                    ["", "Yes", "No"], 
-                                    index=["", "Yes", "No"].index(day_data.get("Period (Yes/No)", "")))
+            <div class="card">
+                <h3>Recent Notes</h3>
+                <div id="recent-notes"></div>
+            </div>
+        </div>
+        
+        <!-- Health Info Tab -->
+        <div id="health-info" class="tab-content">
+            <h2>Health Information Hub</h2>
             
-            with col2:
-                meals = st.text_input("Meals Taken", 
-                                    day_data.get("Meals Taken", ""))
-                iron_food = st.selectbox("Iron-Rich Food Today?", 
-                                       ["", "Yes", "No"], 
-                                       index=["", "Yes", "No"].index(day_data.get("Iron-Rich Food (Yes/No)", "")))
-                pcos_food = st.selectbox("PCOS-Friendly Food Today?", 
-                                       ["", "Yes", "No"], 
-                                       index=["", "Yes", "No"].index(day_data.get("PCOS-Friendly Food (Yes/No)", "")))
-                supplements = st.text_input("Supplements Taken", 
-                                          day_data.get("Supplements Taken", ""))
-                exercise = st.text_input("Exercise Done", 
-                                       day_data.get("Exercise Done", ""))
-                wellness = st.selectbox("Wellness Activity", 
-                                      [""] + data["Wellness"], 
-                                      index=([""] + data["Wellness"]).index(day_data.get("Wellness Activity Done", "")))
-                water = st.number_input("Water Intake (glasses)", 0, 15, 
-                                      int(day_data.get("Water Intake (glasses)", 8)))
-                notes = st.text_area("Notes/Reflections", 
-                                   day_data.get("Notes/Reflections", ""))
-            
-            submitted = st.form_submit_button("Save Entry")
-            
-            if submitted and selected_date in st.session_state.tracker["Date"].values:
-                idx = st.session_state.tracker[st.session_state.tracker["Date"] == selected_date].index[0]
-                st.session_state.tracker.at[idx, "Mood (1-10)"] = mood
-                st.session_state.tracker.at[idx, "Energy Level (1-10)"] = energy
-                st.session_state.tracker.at[idx, "Symptoms Noticed"] = symptoms
-                st.session_state.tracker.at[idx, "Period (Yes/No)"] = period
-                st.session_state.tracker.at[idx, "Meals Taken"] = meals
-                st.session_state.tracker.at[idx, "Iron-Rich Food (Yes/No)"] = iron_food
-                st.session_state.tracker.at[idx, "PCOS-Friendly Food (Yes/No)"] = pcos_food
-                st.session_state.tracker.at[idx, "Supplements Taken"] = supplements
-                st.session_state.tracker.at[idx, "Exercise Done"] = exercise
-                st.session_state.tracker.at[idx, "Wellness Activity Done"] = wellness
-                st.session_state.tracker.at[idx, "Water Intake (glasses)"] = water
-                st.session_state.tracker.at[idx, "Notes/Reflections"] = notes
+            <div class="grid">
+                <div class="card">
+                    <h3>Low Hemoglobin Info</h3>
+                    <p><strong>What is it?</strong> Fewer red blood cells or low hemoglobin levels leading to anemia.</p>
+                    <p><strong>Symptoms:</strong> Fatigue, weakness, pale skin, shortness of breath.</p>
+                    <p><strong>Causes:</strong> Iron deficiency, vitamin deficiencies, chronic disease.</p>
+                    <button class="btn" onclick="showMore('hb-info')">Show More</button>
+                    <div id="hb-info" style="display:none;">
+                        <p><strong>Tests:</strong> CBC, Iron studies (ferritin, TIBC), B12, Folate.</p>
+                        <p><strong>Risks if untreated:</strong> Heart problems, pregnancy complications.</p>
+                    </div>
+                </div>
                 
-                st.success("Daily entry saved!")
-    
-    elif page == "Progress Analytics":
-        st.title("Your Progress Analytics")
+                <div class="card">
+                    <h3>PCOS Info</h3>
+                    <p><strong>What is PCOS?</strong> Hormonal disorder with irregular ovulation and excess androgens.</p>
+                    <p><strong>Symptoms:</strong> Irregular periods, acne, hair thinning, weight gain.</p>
+                    <p><strong>Causes:</strong> Insulin resistance, inflammation, genetics.</p>
+                    <button class="btn" onclick="showMore('pcos-info')">Show More</button>
+                    <div id="pcos-info" style="display:none;">
+                        <p><strong>Tests:</strong> Testosterone, LH & FSH, fasting insulin, ultrasound.</p>
+                        <p><strong>Risks:</strong> Type 2 diabetes, high cholesterol, infertility.</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Foods & Benefits</h3>
+                    <ul>
+                        <li><strong>Spinach:</strong> High in iron</li>
+                        <li><strong>Lentils:</strong> Iron + protein</li>
+                        <li><strong>Pumpkin seeds:</strong> Iron + zinc</li>
+                        <li><strong>Fatty fish:</strong> Omega-3s</li>
+                    </ul>
+                    <button class="btn" onclick="showMore('food-info')">Show More</button>
+                    <div id="food-info" style="display:none;">
+                        <ul>
+                            <li><strong>Eggs:</strong> Protein + B12</li>
+                            <li><strong>Berries:</strong> Antioxidants</li>
+                            <li><strong>Oats:</strong> Low GI</li>
+                            <li><strong>Quinoa:</strong> Protein + fiber</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Supplements Guide</h3>
+                    <ul>
+                        <li><strong>Iron:</strong> Raises hemoglobin</li>
+                        <li><strong>Vitamin B12:</strong> Red blood cells</li>
+                        <li><strong>Inositol:</strong> Insulin sensitivity</li>
+                        <li><strong>Omega-3:</strong> Anti-inflammatory</li>
+                    </ul>
+                    <button class="btn" onclick="showMore('supp-info')">Show More</button>
+                    <div id="supp-info" style="display:none;">
+                        <ul>
+                            <li><strong>Folic Acid:</strong> Supports Hb</li>
+                            <li><strong>Vitamin D:</strong> Mood + immunity</li>
+                            <li><strong>Magnesium:</strong> Reduces stress</li>
+                            <li><strong>Zinc:</strong> Immune + hormones</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
         
-        if not st.session_state.tracker.empty:
-            # Mood and Energy Trends
-            fig, ax = plt.subplots(figsize=(10, 4))
-            ax.plot(st.session_state.tracker["Day"], 
-                    st.session_state.tracker["Mood (1-10)"], 
-                    label="Mood", marker="o")
-            ax.plot(st.session_state.tracker["Day"], 
-                    st.session_state.tracker["Energy Level (1-10)"], 
-                    label="Energy", marker="o")
-            ax.set_title("Mood and Energy Trends")
-            ax.set_ylabel("Score (1-10)")
-            ax.legend()
-            ax.grid(True)
-            st.pyplot(fig)
+        <!-- Daily Tracker Tab -->
+        <div id="daily-tracker" class="tab-content">
+            <h2>Daily Wellness Tracker</h2>
             
-            # Water Intake
-            fig2, ax2 = plt.subplots(figsize=(10, 4))
-            ax2.bar(st.session_state.tracker["Day"], 
-                   st.session_state.tracker["Water Intake (glasses)"])
-            ax2.set_title("Water Intake")
-            ax2.set_ylabel("Glasses per day")
-            st.pyplot(fig2)
-            
-            # Iron and PCOS food compliance
-            iron_days = st.session_state.tracker["Iron-Rich Food (Yes/No)"] == "Yes"
-            pcos_days = st.session_state.tracker["PCOS-Friendly Food (Yes/No)"] == "Yes"
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric("Days with Iron-Rich Foods", f"{iron_days.sum()}/28")
-            with col2:
-                st.metric("Days with PCOS-Friendly Foods", f"{pcos_days.sum()}/28")
-            
-            # Wellness activities frequency
-            wellness_counts = st.session_state.tracker["Wellness Activity Done"].value_counts()
-            if not wellness_counts.empty:
-                fig3, ax3 = plt.subplots(figsize=(10, 4))
-                wellness_counts.plot(kind="bar", ax=ax3)
-                ax3.set_title("Wellness Activities Frequency")
-                st.pyplot(fig3)
-        else:
-            st.warning("No tracking data available yet")
-    
-    elif page == "Personalized Recommendations":
-        st.title("Personalized Recommendations")
+            <div class="card">
+                <label for="tracker-date">Select Date:</label>
+                <input type="date" id="tracker-date">
+                
+                <div class="grid">
+                    <div>
+                        <label for="day-mood">Mood (1-10):</label>
+                        <input type="range" id="day-mood" min="1" max="10" value="5">
+                        <span id="day-mood-value">5</span>
+                        
+                        <label for="day-energy">Energy Level (1-10):</label>
+                        <input type="range" id="day-energy" min="1" max="10" value="5">
+                        <span id="day-energy-value">5</span>
+                        
+                        <label for="symptoms">Symptoms Noticed:</label>
+                        <textarea id="symptoms" rows="3"></textarea>
+                        
+                        <label>Period Today?</label>
+                        <select id="period">
+                            <option value="">Select</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="meals">Meals Taken:</label>
+                        <input type="text" id="meals">
+                        
+                        <label>Iron-Rich Food Today?</label>
+                        <select id="iron-food">
+                            <option value="">Select</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                        
+                        <label>PCOS-Friendly Food Today?</label>
+                        <select id="pcos-food">
+                            <option value="">Select</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                        
+                        <label for="supplements">Supplements Taken:</label>
+                        <input type="text" id="supplements">
+                    </div>
+                    
+                    <div>
+                        <label for="exercise">Exercise Done:</label>
+                        <input type="text" id="exercise">
+                        
+                        <label for="wellness">Wellness Activity:</label>
+                        <select id="wellness">
+                            <option value="">Select</option>
+                            <option>Journaling</option>
+                            <option>Warm bath</option>
+                            <option>Long walks in nature</option>
+                            <option>Phone calls with loved ones</option>
+                            <option>Deep breathing</option>
+                            <option>Listening to music</option>
+                            <option>Stretching/Yoga</option>
+                            <option>Reading a comforting book</option>
+                            <option>Spending time in sunlight</option>
+                            <option>Digital detox</option>
+                        </select>
+                        
+                        <label for="day-water">Water Intake (glasses):</label>
+                        <input type="number" id="day-water" min="0" max="15" value="8">
+                        
+                        <label for="notes">Notes/Reflections:</label>
+                        <textarea id="notes" rows="3"></textarea>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="saveDailyEntry()">Save Daily Entry</button>
+            </div>
+        </div>
         
-        if not st.session_state.tracker.empty:
-            # Analyze mood and energy patterns
-            avg_mood = st.session_state.tracker["Mood (1-10)"].mean()
-            avg_energy = st.session_state.tracker["Energy Level (1-10)"].mean()
+        <!-- Analytics Tab -->
+        <div id="analytics" class="tab-content">
+            <h2>Your Progress Analytics</h2>
             
-            # Check for common symptoms
-            symptoms_text = " ".join(st.session_state.tracker["Symptoms Noticed"].dropna())
-            common_symptoms = {
-                "fatigue": symptoms_text.lower().count("fatigue"),
-                "weakness": symptoms_text.lower().count("weakness"),
-                "dizziness": symptoms_text.lower().count("dizziness"),
-                "irregular": symptoms_text.lower().count("irregular"),
-                "acne": symptoms_text.lower().count("acne"),
-                "hair": symptoms_text.lower().count("hair")
+            <div class="card">
+                <h3>Mood and Energy Trends</h3>
+                <canvas id="moodChart" height="200"></canvas>
+            </div>
+            
+            <div class="grid">
+                <div class="card">
+                    <h3>Water Intake</h3>
+                    <canvas id="waterChart" height="200"></canvas>
+                </div>
+                
+                <div class="card">
+                    <h3>Food Compliance</h3>
+                    <canvas id="foodChart" height="200"></canvas>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Wellness Activities</h3>
+                <canvas id="wellnessChart" height="200"></canvas>
+            </div>
+        </div>
+        
+        <!-- Low Mood Tab -->
+        <div id="low-mood" class="tab-content">
+            <h2>🌸 Low Mood Helpers 🌸</h2>
+            <p>When you're feeling down, try one of these activities:</p>
+            
+            <div class="mood-activity">
+                <h3>🎵 Listen to a Uplifting Playlist</h3>
+                <p>Music can instantly boost your mood. Try these curated playlists:</p>
+                
+                <div class="playlist-container">
+                    <div class="playlist-card">
+                        <h4>Chill Vibes</h4>
+                        <p>Relaxing tunes to calm your mind</p>
+                        <button class="btn" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1DX4WYpdgoIcn6')">Open Playlist</button>
+                    </div>
+                    
+                    <div class="playlist-card">
+                        <h4>Happy Beats</h4>
+                        <p>Upbeat songs to lift your spirits</p>
+                        <button class="btn" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1DXdPec7aLTmlC')">Open Playlist</button>
+                    </div>
+                    
+                    <div class="playlist-card">
+                        <h4>Nature Sounds</h4>
+                        <p>Calming nature for stress relief</p>
+                        <button class="btn" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1DWZqd5JICZI0u')">Open Playlist</button>
+                    </div>
+                    
+                    <div class="playlist-card">
+                        <h4>Feel Good Pop</h4>
+                        <p>Popular songs to sing along to</p>
+                        <button class="btn" onclick="window.open('https://open.spotify.com/playlist/37i9dQZF1DX3rxVfibe1L0')">Open Playlist</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mood-activity">
+                <h3>✏️ Journal Your Thoughts</h3>
+                <p>Writing down your feelings can help process them:</p>
+                <textarea class="journal-entry" placeholder="How are you feeling today? What's on your mind?"></textarea>
+                <button class="btn" onclick="saveJournalEntry()">Save Journal Entry</button>
+                <button class="btn" onclick="clearJournalEntry()">Clear</button>
+            </div>
+            
+            <div class="mood-activity">
+                <h3>🎮 Play a Quick Game</h3>
+                <p>Distract yourself with something fun:</p>
+                
+                <div class="game-container">
+                    <button class="game-btn" onclick="window.open('https://www.nytimes.com/games/wordle')">Play Wordle</button>
+                    <button class="game-btn" onclick="window.open('https://quickdraw.withgoogle.com')">Quick Draw</button>
+                    <button class="game-btn" onclick="window.open('https://www.crazygames.com/game/sushi-slice')">Sushi Slice</button>
+                    <button class="game-btn" onclick="window.open('https://www.crazygames.com/game/2048')">2048 Puzzle</button>
+                </div>
+            </div>
+            
+            <div class="mood-activity">
+                <h3>🧘‍♀️ Guided Relaxation</h3>
+                <p>Take 5 minutes to reset:</p>
+                
+                <div class="grid">
+                    <div class="card">
+                        <h4>Breathing Exercise</h4>
+                        <p>Follow along with this simple pattern:</p>
+                        <div style="text-align: center; font-size: 1.5em; margin: 20px 0;">
+                            <div id="breath-text">Breathe in... (4 seconds)</div>
+                            <div id="breath-timer" style="font-size: 2em; color: #FF9AA2;">4</div>
+                        </div>
+                        <button class="btn" id="breath-btn" onclick="startBreathing()">Start Breathing Exercise</button>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>Quick Meditation</h4>
+                        <p>Listen to a short guided meditation:</p>
+                        <button class="btn" onclick="window.open('https://www.youtube.com/watch?v=inpok4MKVLM')">5-Minute Meditation</button>
+                        <button class="btn" onclick="window.open('https://www.youtube.com/watch?v=cyUzUY5_CM4')">Body Scan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recommendations Tab -->
+        <div id="recommendations" class="tab-content">
+            <h2>Personalized Recommendations</h2>
+            
+            <div class="card">
+                <h3>Based on your data:</h3>
+                <div id="personal-recs"></div>
+            </div>
+            
+            <div class="grid">
+                <div class="card">
+                    <h3>For Low Energy</h3>
+                    <ul>
+                        <li>Try iron-rich foods like spinach and lentils</li>
+                        <li>Consider Vitamin B12 supplements</li>
+                        <li>Short walks in sunlight can boost energy</li>
+                        <li>Stay hydrated - aim for 8+ glasses of water</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <h3>For PCOS Symptoms</h3>
+                    <ul>
+                        <li>Focus on PCOS-friendly foods like fatty fish</li>
+                        <li>Try Inositol supplements</li>
+                        <li>Gentle yoga can help with symptoms</li>
+                        <li>Manage stress with journaling or meditation</li>
+                    </ul>
+                </div>
+                
+                <div class="card">
+                    <h3>For Low Mood</h3>
+                    <ul>
+                        <li>Engage in favorite wellness activities</li>
+                        <li>Connect with friends or loved ones</li>
+                        <li>Try the "Low Mood Helpers" tab</li>
+                        <li>Consider Vitamin D supplements</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data storage
+        let trackerData = [];
+        
+        // Initialize with some sample data
+        function initializeData() {
+            if(localStorage.getItem('wellnessTracker')) {
+                trackerData = JSON.parse(localStorage.getItem('wellnessTracker'));
+            } else {
+                // Create sample data for the past 7 days
+                const today = new Date();
+                for(let i = 6; i >= 0; i--) {
+                    const date = new Date();
+                    date.setDate(today.getDate() - i);
+                    
+                    trackerData.push({
+                        date: date.toISOString().split('T')[0],
+                        day: `Day ${7-i}`,
+                        mood: Math.floor(Math.random() * 4) + 5,
+                        energy: Math.floor(Math.random() * 4) + 4,
+                        symptoms: i % 2 === 0 ? "Some fatigue" : "Feeling okay",
+                        period: i === 3 ? "Yes" : "No",
+                        meals: "Breakfast, Lunch, Dinner",
+                        ironFood: i % 2 === 0 ? "Yes" : "No",
+                        pcosFood: i % 3 === 0 ? "No" : "Yes",
+                        supplements: i % 2 === 0 ? "Iron, B12" : "Vitamin D",
+                        exercise: i % 2 === 0 ? "30min walk" : "Yoga",
+                        wellness: i % 2 === 0 ? "Journaling" : "Listening to music",
+                        water: Math.floor(Math.random() * 4) + 6,
+                        notes: i % 2 === 0 ? "Had a good day" : "Felt tired in afternoon"
+                    });
+                }
+                saveData();
             }
             
-            # Generate recommendations based on data
-            st.subheader("Based on your data:")
+            updateDashboard();
+            updateCharts();
+        }
+        
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('wellnessTracker', JSON.stringify(trackerData));
+        }
+        
+        // Tab navigation
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove("active");
+            }
             
-            if avg_mood < 5 or avg_energy < 5:
-                st.warning("Your mood and energy levels seem consistently low")
-                st.markdown("""
-                **Recommendations:**
-                - Consider increasing iron-rich foods like spinach, lentils, and pumpkin seeds
-                - Try the supplements: Iron, Vitamin B12, and Magnesium
-                - Engage in these wellness activities: Long walks in nature, Spending time in sunlight
-                """)
+            const tabButtons = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove("active");
+            }
             
-            if common_symptoms["fatigue"] > 5 or common_symptoms["weakness"] > 5:
-                st.warning("You're reporting frequent fatigue/weakness")
-                st.markdown("""
-                **Recommendations:**
-                - Get your hemoglobin levels checked (CBC test)
-                - Ensure you're eating iron-rich foods daily
-                - Consider short naps or rest periods during the day
-                """)
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
             
-            if common_symptoms["irregular"] > 3 or common_symptoms["acne"] > 3 or common_symptoms["hair"] > 3:
-                st.warning("You're showing potential PCOS symptoms")
-                st.markdown("""
-                **Recommendations:**
-                - Focus on PCOS-friendly foods like fatty fish, nuts, and quinoa
-                - Consider supplements: Inositol, Omega-3, and Zinc
-                - Try yoga and stress-reduction techniques
-                - Consult with an endocrinologist if symptoms persist
-                """)
+            if(tabName === 'analytics') {
+                updateCharts();
+            } else if(tabName === 'recommendations') {
+                generateRecommendations();
+            }
+        }
+        
+        // Show more info
+        function showMore(id) {
+            const element = document.getElementById(id);
+            if(element.style.display === "none") {
+                element.style.display = "block";
+            } else {
+                element.style.display = "none";
+            }
+        }
+        
+        // Update dashboard with latest data
+        function updateDashboard() {
+            if(trackerData.length > 0) {
+                // Calculate averages
+                const moods = trackerData.map(entry => entry.mood).filter(val => val);
+                const energies = trackerData.map(entry => entry.energy).filter(val => val);
+                const waters = trackerData.map(entry => entry.water).filter(val => val);
+                const ironDays = trackerData.filter(entry => entry.ironFood === "Yes").length;
+                const pcosDays = trackerData.filter(entry => entry.pcosFood === "Yes").length;
+                
+                document.getElementById('avg-mood').textContent = 
+                    moods.length > 0 ? (moods.reduce((a,b) => a + b, 0) / moods.length).toFixed(1) : '-';
+                document.getElementById('avg-energy').textContent = 
+                    energies.length > 0 ? (energies.reduce((a,b) => a + b, 0) / energies.length).toFixed(1) : '-';
+                document.getElementById('avg-water').textContent = 
+                    waters.length > 0 ? (waters.reduce((a,b) => a + b, 0) / waters.length).toFixed(1) : '-';
+                document.getElementById('iron-days').textContent = ironDays;
+                document.getElementById('pcos-days').textContent = pcosDays;
+                
+                // Show recent notes
+                const recentNotes = trackerData.slice(-3).reverse();
+                let notesHtml = '';
+                recentNotes.forEach(entry => {
+                    notesHtml += `<p><strong>${entry.day}:</strong> ${entry.notes || 'No notes'}</p>`;
+                });
+                document.getElementById('recent-notes').innerHTML = notesHtml;
+            }
+        }
+        
+        // Save quick log from dashboard
+        function saveQuickLog() {
+            const today = new Date().toISOString().split('T')[0];
+            const mood = parseInt(document.getElementById('mood').value);
+            const energy = parseInt(document.getElementById('energy').value);
+            const water = parseInt(document.getElementById('water').value);
             
-            # Check water intake
-            avg_water = st.session_state.tracker["Water Intake (glasses)"].mean()
-            if avg_water < 6:
-                st.warning("Your water intake seems low")
-                st.markdown("""
-                **Recommendations:**
-                - Aim for at least 8 glasses of water daily
-                - Carry a water bottle with you
-                - Set hourly reminders to drink water
-                """)
+            // Find or create today's entry
+            let todayEntry = trackerData.find(entry => entry.date === today);
+            if(!todayEntry) {
+                todayEntry = {
+                    date: today,
+                    day: `Day ${trackerData.length + 1}`,
+                    mood: mood,
+                    energy: energy,
+                    water: water
+                };
+                trackerData.push(todayEntry);
+            } else {
+                todayEntry.mood = mood;
+                todayEntry.energy = energy;
+                todayEntry.water = water;
+            }
             
-            # Show most helpful wellness activities
-            if "Wellness Activity Done" in st.session_state.tracker.columns:
-                wellness_corr = st.session_state.tracker[["Wellness Activity Done", "Mood (1-10)", "Energy Level (1-10)"]]
-                wellness_corr = wellness_corr.groupby("Wellness Activity Done").mean()
-                if not wellness_corr.empty:
-                    top_wellness = wellness_corr.mean(axis=1).sort_values(ascending=False).head(3)
-                    st.subheader("Your most effective wellness activities:")
-                    for activity, score in top_wellness.items():
-                        st.markdown(f"- **{activity}** (Avg mood+energy: {score:.1f}/10)")
-        else:
-            st.warning("Complete more tracking data to get personalized recommendations")
-
-if __name__ == "__main__":
-    main()
+            saveData();
+            updateDashboard();
+            alert('Today\'s data saved!');
+        }
+        
+        // Save daily tracker entry
+        function saveDailyEntry() {
+            const date = document.getElementById('tracker-date').value;
+            const mood = parseInt(document.getElementById('day-mood').value);
+            const energy = parseInt(document.getElementById('day-energy').value);
+            const symptoms = document.getElementById('symptoms').value;
+            const period = document.getElementById('period').value;
+            const meals = document.getElementById('meals').value;
+            const ironFood = document.getElementById('iron-food').value;
+            const pcosFood = document.getElementById('pcos-food').value;
+            const supplements = document.getElementById('supplements').value;
+            const exercise = document.getElementById('exercise').value;
+            const wellness = document.getElementById('wellness').value;
+            const water = parseInt(document.getElementById('day-water').value);
+            const notes = document.getElementById('notes').value;
+            
+            // Find or create entry for this date
+            let entry = trackerData.find(e => e.date === date);
+            if(!entry) {
+                entry = {
+                    date: date,
+                    day: `Day ${trackerData.length + 1}`
+                };
+                trackerData.push(entry);
+            }
+            
+            // Update entry
+            entry.mood = mood;
+            entry.energy = energy;
+            entry.symptoms = symptoms;
+            entry.period = period;
+            entry.meals = meals;
+            entry.ironFood = ironFood;
+            entry.pcosFood = pcosFood;
+            entry.supplements = supplements;
+            entry.exercise = exercise;
+            entry.wellness = wellness;
+            entry.water = water;
+            entry.notes = notes;
+            
+            saveData();
+            updateDashboard();
+            alert('Daily entry saved!');
+        }
+        
+        // Update charts
+        function updateCharts() {
+            if(trackerData.length === 0) return;
+            
+            // Sort data by date
+            const sortedData = [...trackerData].sort((a,b) => new Date(a.date) - new Date(b.date));
+            const labels = sortedData.map(entry => entry.day);
+            
+            // Mood and Energy Chart
+            const moodCtx = document.getElementById('moodChart').getContext('2d');
+            if(window.moodChart) window.moodChart.destroy();
+            window.moodChart = new Chart(moodCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Mood (1-10)',
+                            data: sortedData.map(entry => entry.mood),
+                            borderColor: '#FF9AA2',
+                            backgroundColor: 'rgba(255, 154, 162, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Energy (1-10)',
+                            data: sortedData.map(entry => entry.energy),
+                            borderColor: '#B5EAD7',
+                            backgroundColor: 'rgba(181, 234, 215, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 1,
+                            max: 10
+                        }
+                    }
+                }
+            });
+            
+            // Water Intake Chart
+            const waterCtx = document.getElementById('waterChart').getContext('2d');
+            if(window.waterChart) window.waterChart.destroy();
+            window.waterChart = new Chart(waterCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Water (glasses)',
+                        data: sortedData.map(entry => entry.water),
+                        backgroundColor: 'rgba(117, 201, 242, 0.7)',
+                        borderColor: 'rgba(117, 201, 242, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 15
+                        }
+                    }
+                }
+            });
+            
+            // Food Compliance Chart
+            const foodCtx = document.getElementById('foodChart').getContext('2d');
+            if(window.foodChart) window.foodChart.destroy();
+            window.foodChart = new Chart(foodCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Iron-Rich Days', 'PCOS-Friendly Days', 'Other Days'],
+                    datasets: [{
+                        data: [
+                            sortedData.filter(entry => entry.ironFood === 'Yes').length,
+                            sortedData.filter(entry => entry.pcosFood === 'Yes').length,
+                            sortedData.filter(entry => entry.ironFood !== 'Yes' && entry.pcosFood !== 'Yes').length
+                        ],
+                        backgroundColor: [
+                            '#FFB7B2',
+                            '#B5EAD7',
+                            '#E2F0CB'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+            
+            // Wellness Activities Chart
+            const wellnessCounts = {};
+            sortedData.forEach(entry => {
+                if(entry.wellness) {
+                    wellnessCounts[entry.wellness] = (wellnessCounts[entry.wellness] || 0) + 1;
+                }
+            });
+            
+            const wellnessCtx = document.getElementById('wellnessChart').getContext('2d');
+            if(window.wellnessChart) window.wellnessChart.destroy();
+            window.wellnessChart = new Chart(wellnessCtx, {
+                type: 'polarArea',
+                data: {
+                    labels: Object.keys(wellnessCounts),
+                    datasets: [{
+                        data: Object.values(wellnessCounts),
+                        backgroundColor: [
+                            '#FFD1DC', '#E6E6FA', '#B5EAD7', '#C7F0DB', 
+                            '#FFFACD', '#FFDFD3', '#D4A5A5', '#A2C5BF'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+        }
+        
+        // Generate personalized recommendations
+        function generateRecommendations() {
+            if(trackerData.length === 0) {
+                document.getElementById('personal-recs').innerHTML = '<p>Complete some tracking data to get personalized recommendations.</p>';
+                return;
+            }
+            
+            // Calculate averages
+            const moods = trackerData.map(entry => entry.mood).filter(val => val);
+            const energies = trackerData.map(entry => entry.energy).filter(val => val);
+            const avgMood = moods.reduce((a,b) => a + b, 0) / moods.length;
+            const avgEnergy = energies.reduce((a,b) => a + b, 0) / energies.length;
+            
+            // Check for common symptoms
+            const symptomsText = trackerData.map(entry => entry.symptoms).join(' ').toLowerCase();
+            const hasFatigue = symptomsText.includes('fatigue') || symptomsText.includes('tired');
+            const hasPCOSSymptoms = symptomsText.includes('irregular') || symptomsText.includes('acne') || symptomsText.includes('hair');
+            
+            let recs = '<ul>';
+            
+            if(avgMood < 5 || avgEnergy < 5) {
+                recs += '<li><strong>For low mood/energy:</strong> Try increasing iron-rich foods, consider Vitamin B12 supplements, and engage in gentle exercise like walking.</li>';
+            }
+            
+            if(hasFatigue) {
+                recs += '<li><strong>For fatigue:</strong> Ensure adequate hydration, consider iron supplements if deficient, and prioritize rest.</li>';
+            }
+            
+            if(hasPCOSSymptoms) {
+                recs += '<li><strong>For PCOS symptoms:</strong> Focus on low-GI foods, consider inositol supplements, and manage stress with yoga or meditation.</li>';
+            }
+            
+            // Check water intake
+            const waters = trackerData.map(entry => entry.water).filter(val => val);
+            const avgWater = waters.reduce((a,b) => a + b, 0) / waters.length;
+            if(avgWater < 6) {
+                recs += '<li><strong>For hydration:</strong> Aim for at least 8 glasses of water daily. Carry a water bottle with you as a reminder.</li>';
+            }
+            
+            // Check wellness activities correlation with mood
+            const wellnessActivities = {};
+            trackerData.forEach(entry => {
+                if(entry.wellness && entry.mood) {
+                    if(!wellnessActivities[entry.wellness]) {
+                        wellnessActivities[entry.wellness] = { sum: 0, count: 0 };
+                    }
+                    wellnessActivities[entry.wellness].sum += entry.mood;
+                    wellnessActivities[entry.wellness].count++;
+                }
+            });
+            
+            // Find top 3 activities with highest average mood
+            const topActivities = Object.entries(wellnessActivities)
+                .map(([activity, data]) => ({
+                    activity,
+                    avgMood: data.sum / data.count
+                }))
+                .sort((a,b) => b.avgMood - a.avgMood)
+                .slice(0, 3);
+            
+            if(topActivities.length > 0) {
+                recs += '<li><strong>Your most effective mood boosters:</strong> ';
+                recs += topActivities.map(a => `${a.activity} (avg mood ${a.avgMood.toFixed(1)}/10)`).join(', ');
+                recs += '</li>';
+            }
+            
+            recs += '</ul>';
+            
+            document.getElementById('personal-recs').innerHTML = recs;
+        }
+        
+        // Breathing exercise
+        let breathInterval;
+        let breathPhase = 'in'; // 'in', 'hold', 'out'
+        let breathCount = 4;
+        
+        function startBreathing() {
+            const btn = document.getElementById('breath-btn');
+            if(btn.textContent === 'Start Breathing Exercise') {
+                btn.textContent = 'Stop Exercise';
+                breathPhase = 'in';
+                breathCount = 4;
+                updateBreathDisplay();
+                breathInterval = setInterval(breathTimer, 1000);
+            } else {
+                btn.textContent = 'Start Breathing Exercise';
+                clearInterval(breathInterval);
+                document.getElementById('breath-text').textContent = 'Breathe in... (4 seconds)';
+                document.getElementById('breath-timer').textContent = '4';
+            }
+        }
+        
+        function breathTimer() {
+            breathCount--;
+            
+            if(breathCount <= 0) {
+                switch(breathPhase) {
+                    case 'in':
+                        breathPhase = 'hold';
+                        breathCount = 4;
+                        document.getElementById('breath-text').textContent = 'Hold... (4 seconds)';
+                        break;
+                    case 'hold':
+                        breathPhase = 'out';
+                        breathCount = 6;
+                        document.getElementById('breath-text').textContent = 'Breathe out... (6 seconds)';
+                        break;
+                    case 'out':
+                        breathPhase = 'in';
+                        breathCount = 4;
+                        document.getElementById('breath-text').textContent = 'Breathe in... (4 seconds)';
+                        break;
+                }
+            }
+            
+            document.getElementById('breath-timer').textContent = breathCount;
+        }
+        
+        function updateBreathDisplay() {
+            document.getElementById('breath-timer').textContent = breathCount;
+        }
+        
+        // Journal functions
+        function saveJournalEntry() {
+            const entry = document.querySelector('.journal-entry').value;
+            if(entry.trim()) {
+                localStorage.setItem('journalEntry_' + new Date().toISOString(), entry);
+                alert('Journal entry saved!');
+            }
+        }
+        
+        function clearJournalEntry() {
+            document.querySelector('.journal-entry').value = '';
+        }
+        
+        // Show all data (for debugging)
+        function showAllData() {
+            console.log(trackerData);
+            alert('Check console for all data');
+        }
+        
+        // Initialize slider value displays
+        document.getElementById('mood').addEventListener('input', function() {
+            document.getElementById('mood-value').textContent = this.value;
+        });
+        
+        document.getElementById('energy').addEventListener('input', function() {
+            document.getElementById('energy-value').textContent = this.value;
+        });
+        
+        document.getElementById('day-mood').addEventListener('input', function() {
+            document.getElementById('day-mood-value').textContent = this.value;
+        });
+        
+        document.getElementById('day-energy').addEventListener('input', function() {
+            document.getElementById('day-energy-value').textContent = this.value;
+        });
+        
+        // Set today's date as default in tracker
+        document.getElementById('tracker-date').value = new Date().toISOString().split('T')[0];
+        
+        // Initialize the app
+        window.onload = initializeData;
+    </script>
+</body>
+</html>
