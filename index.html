@@ -1098,6 +1098,20 @@
         
         // Set today's date as default in tracker
         document.getElementById('tracker-date').value = new Date().toISOString().split('T')[0];
+function startBreathing() {
+    try {
+        const btn = document.getElementById('breath-btn');
+        const circle = document.getElementById('breath-circle');
+        
+        if(!btn || !circle) {
+            throw new Error("Could not find breathing exercise elements");
+        }
+        // ... rest of the function
+    } catch(error) {
+        console.error("Breathing exercise error:", error);
+        alert("Error starting breathing exercise. Check console for details.");
+    }
+}
         
         // Initialize the app
         window.onload = initializeData;
