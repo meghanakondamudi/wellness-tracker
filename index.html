@@ -622,499 +622,218 @@
             </div>
         </div>
     </div>
+<script>
+// Initialize variables
+let trackerData = [];
+let moodChart = null;
+let waterChart = null;
+let foodChart = null;
+let wellnessChart = null;
+let breathInterval;
+let breathPhase = 'in';
+let breathCount = 4;
 
-    <script>
-        // Sample data storage
-        let trackerData = [];
-        
-        // Initialize with some sample data
-        function initializeData() {
-            if(localStorage.getItem('wellnessTracker')) {
-                trackerData = JSON.parse(localStorage.getItem('wellnessTracker'));
-            } else {
-                // Create sample data for the past 7 days
-                const today = new Date();
-                for(let i = 6; i >= 0; i--) {
-                    const date = new Date();
-                    date.setDate(today.getDate() - i);
-                    
-                    trackerData.push({
-                        date: date.toISOString().split('T')[0],
-                        day: `Day ${7-i}`,
-                        mood: Math.floor(Math.random() * 4) + 5,
-                        energy: Math.floor(Math.random() * 4) + 4,
-                        symptoms: i % 2 === 0 ? "Some fatigue" : "Feeling okay",
-                        period: i === 3 ? "Yes" : "No",
-                        meals: "Breakfast, Lunch, Dinner",
-                        ironFood: i % 2 === 0 ? "Yes" : "No",
-                        pcosFood: i % 3 === 0 ? "No" : "Yes",
-                        supplements: i % 2 === 0 ? "Iron, B12" : "Vitamin D",
-                        exercise: i % 2 === 0 ? "30min walk" : "Yoga",
-                        wellness: i % 2 === 0 ? "Journaling" : "Listening to music",
-                        water: Math.floor(Math.random() * 4) + 6,
-                        notes: i % 2 === 0 ? "Had a good day" : "Felt tired in afternoon"
-                    });
-                }
-                saveData();
-            }
+// Initialize with sample data
+function initializeData() {
+    if (localStorage.getItem('wellnessTracker')) {
+        trackerData = JSON.parse(localStorage.getItem('wellnessTracker'));
+    } else {
+        // Sample data for 7 days
+        const today = new Date();
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(today.getDate() - i);
             
-            updateDashboard();
-            updateCharts();
-        }
-        
-        // Save data to localStorage
-        function saveData() {
-            localStorage.setItem('wellnessTracker', JSON.stringify(trackerData));
-        }
-        
-        // Tab navigation
-        function openTab(evt, tabName) {
-            const tabContents = document.getElementsByClassName("tab-content");
-            for (let i = 0; i < tabContents.length; i++) {
-                tabContents[i].classList.remove("active");
-            }
-            
-            const tabButtons = document.getElementsByClassName("tab-btn");
-            for (let i = 0; i < tabButtons.length; i++) {
-                tabButtons[i].classList.remove("active");
-            }
-            
-            document.getElementById(tabName).classList.add("active");
-            evt.currentTarget.classList.add("active");
-            
-            if(tabName === 'analytics') {
-                updateCharts();
-            } else if(tabName === 'recommendations') {
-                generateRecommendations();
-            }
-        }
-        
-        // Show more info
-        function showMore(id) {
-            const element = document.getElementById(id);
-            if(element.style.display === "none") {
-                element.style.display = "block";
-            } else {
-                element.style.display = "none";
-            }
-        }
-        
-        // Update dashboard with latest data
-        function updateDashboard() {
-            if(trackerData.length > 0) {
-                // Calculate averages
-                const moods = trackerData.map(entry => entry.mood).filter(val => val);
-                const energies = trackerData.map(entry => entry.energy).filter(val => val);
-                const waters = trackerData.map(entry => entry.water).filter(val => val);
-                const ironDays = trackerData.filter(entry => entry.ironFood === "Yes").length;
-                const pcosDays = trackerData.filter(entry => entry.pcosFood === "Yes").length;
-                
-                document.getElementById('avg-mood').textContent = 
-                    moods.length > 0 ? (moods.reduce((a,b) => a + b, 0) / moods.length).toFixed(1) : '-';
-                document.getElementById('avg-energy').textContent = 
-                    energies.length > 0 ? (energies.reduce((a,b) => a + b, 0) / energies.length).toFixed(1) : '-';
-                document.getElementById('avg-water').textContent = 
-                    waters.length > 0 ? (waters.reduce((a,b) => a + b, 0) / waters.length).toFixed(1) : '-';
-                document.getElementById('iron-days').textContent = ironDays;
-                document.getElementById('pcos-days').textContent = pcosDays;
-                
-                // Show recent notes
-                const recentNotes = trackerData.slice(-3).reverse();
-                let notesHtml = '';
-                recentNotes.forEach(entry => {
-                    notesHtml += `<p><strong>${entry.day}:</strong> ${entry.notes || 'No notes'}</p>`;
-                });
-                document.getElementById('recent-notes').innerHTML = notesHtml;
-            }
-        }
-        
-        // Save quick log from dashboard
-        function saveQuickLog() {
-            const today = new Date().toISOString().split('T')[0];
-            const mood = parseInt(document.getElementById('mood').value);
-            const energy = parseInt(document.getElementById('energy').value);
-            const water = parseInt(document.getElementById('water').value);
-            
-            // Find or create today's entry
-            let todayEntry = trackerData.find(entry => entry.date === today);
-            if(!todayEntry) {
-                todayEntry = {
-                    date: today,
-                    day: `Day ${trackerData.length + 1}`,
-                    mood: mood,
-                    energy: energy,
-                    water: water
-                };
-                trackerData.push(todayEntry);
-            } else {
-                todayEntry.mood = mood;
-                todayEntry.energy = energy;
-                todayEntry.water = water;
-            }
-            
-            saveData();
-            updateDashboard();
-            alert('Today\'s data saved!');
-        }
-        
-        // Save daily tracker entry
-        function saveDailyEntry() {
-            const date = document.getElementById('tracker-date').value;
-            const mood = parseInt(document.getElementById('day-mood').value);
-            const energy = parseInt(document.getElementById('day-energy').value);
-            const symptoms = document.getElementById('symptoms').value;
-            const period = document.getElementById('period').value;
-            const meals = document.getElementById('meals').value;
-            const ironFood = document.getElementById('iron-food').value;
-            const pcosFood = document.getElementById('pcos-food').value;
-            const supplements = document.getElementById('supplements').value;
-            const exercise = document.getElementById('exercise').value;
-            const wellness = document.getElementById('wellness').value;
-            const water = parseInt(document.getElementById('day-water').value);
-            const notes = document.getElementById('notes').value;
-            
-            // Find or create entry for this date
-            let entry = trackerData.find(e => e.date === date);
-            if(!entry) {
-                entry = {
-                    date: date,
-                    day: `Day ${trackerData.length + 1}`
-                };
-                trackerData.push(entry);
-            }
-            
-            // Update entry
-            entry.mood = mood;
-            entry.energy = energy;
-            entry.symptoms = symptoms;
-            entry.period = period;
-            entry.meals = meals;
-            entry.ironFood = ironFood;
-            entry.pcosFood = pcosFood;
-            entry.supplements = supplements;
-            entry.exercise = exercise;
-            entry.wellness = wellness;
-            entry.water = water;
-            entry.notes = notes;
-            
-            saveData();
-            updateDashboard();
-            alert('Daily entry saved!');
-        }
-        
-        // Update charts
-        function updateCharts() {
-            if(trackerData.length === 0) return;
-            
-            // Sort data by date
-            const sortedData = [...trackerData].sort((a,b) => new Date(a.date) - new Date(b.date));
-            const labels = sortedData.map(entry => entry.day);
-            
-            // Mood and Energy Chart
-            const moodCtx = document.getElementById('moodChart').getContext('2d');
-            if(window.moodChart) window.moodChart.destroy();
-            window.moodChart = new Chart(moodCtx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Mood (1-10)',
-                            data: sortedData.map(entry => entry.mood),
-                            borderColor: '#888',
-                            backgroundColor: 'rgba(200, 200, 200, 0.1)',
-                            tension: 0.3,
-                            fill: true
-                        },
-                        {
-                            label: 'Energy (1-10)',
-                            data: sortedData.map(entry => entry.energy),
-                            borderColor: '#555',
-                            backgroundColor: 'rgba(150, 150, 150, 0.1)',
-                            tension: 0.3,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            min: 1,
-                            max: 10
-                        }
-                    }
-                }
-            });
-            
-            // Water Intake Chart
-            const waterCtx = document.getElementById('waterChart').getContext('2d');
-            if(window.waterChart) window.waterChart.destroy();
-            window.waterChart = new Chart(waterCtx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Water (glasses)',
-                        data: sortedData.map(entry => entry.water),
-                        backgroundColor: 'rgba(150, 150, 150, 0.7)',
-                        borderColor: 'rgba(100, 100, 100, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 15
-                        }
-                    }
-                }
-            });
-            
-            // Food Compliance Chart
-            const foodCtx = document.getElementById('foodChart').getContext('2d');
-            if(window.foodChart) window.foodChart.destroy();
-            window.foodChart = new Chart(foodCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Iron-Rich Days', 'PCOS-Friendly Days', 'Other Days'],
-                    datasets: [{
-                        data: [
-                            sortedData.filter(entry => entry.ironFood === 'Yes').length,
-                            sortedData.filter(entry => entry.pcosFood === 'Yes').length,
-                            sortedData.filter(entry => entry.ironFood !== 'Yes' && entry.pcosFood !== 'Yes').length
-                        ],
-                        backgroundColor: [
-                            '#aaa',
-                            '#ddd',
-                            '#888'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true
-                }
-            });
-            
-            // Wellness Activities Chart
-            const wellnessCounts = {};
-            sortedData.forEach(entry => {
-                if(entry.wellness) {
-                    wellnessCounts[entry.wellness] = (wellnessCounts[entry.wellness] || 0) + 1;
-                }
-            });
-            
-            const wellnessCtx = document.getElementById('wellnessChart').getContext('2d');
-            if(window.wellnessChart) window.wellnessChart.destroy();
-            window.wellnessChart = new Chart(wellnessCtx, {
-                type: 'polarArea',
-                data: {
-                    labels: Object.keys(wellnessCounts),
-                    datasets: [{
-                        data: Object.values(wellnessCounts),
-                        backgroundColor: [
-                            '#f0f0f0', '#e0e0e0', '#d0d0d0', '#c0c0c0', 
-                            '#b0b0b0', '#a0a0a0', '#909090', '#808080'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true
-                }
+            trackerData.push({
+                date: date.toISOString().split('T')[0],
+                day: `Day ${7 - i}`,
+                mood: Math.floor(Math.random() * 4) + 5,
+                energy: Math.floor(Math.random() * 4) + 4,
+                water: Math.floor(Math.random() * 4) + 6,
+                ironFood: i % 2 === 0 ? "Yes" : "No",
+                pcosFood: i % 3 === 0 ? "No" : "Yes"
             });
         }
-        
-        // Generate personalized recommendations
-        function generateRecommendations() {
-            if(trackerData.length === 0) {
-                document.getElementById('personal-recs').innerHTML = '<p>Complete some tracking data to get personalized recommendations.</p>';
-                return;
-            }
-            
-            // Calculate averages
-            const moods = trackerData.map(entry => entry.mood).filter(val => val);
-            const energies = trackerData.map(entry => entry.energy).filter(val => val);
-            const avgMood = moods.reduce((a,b) => a + b, 0) / moods.length;
-            const avgEnergy = energies.reduce((a,b) => a + b, 0) / energies.length;
-            
-            // Check for common symptoms
-            const symptomsText = trackerData.map(entry => entry.symptoms).join(' ').toLowerCase();
-            const hasFatigue = symptomsText.includes('fatigue') || symptomsText.includes('tired');
-            const hasPCOSSymptoms = symptomsText.includes('irregular') || symptomsText.includes('acne') || symptomsText.includes('hair');
-            
-            let recs = '<ul>';
-            
-            if(avgMood < 5 || avgEnergy < 5) {
-                recs += '<li><strong>For low mood/energy:</strong> Try increasing iron-rich foods, consider Vitamin B12 supplements, and engage in gentle exercise like walking.</li>';
-            }
-            
-            if(hasFatigue) {
-                recs += '<li><strong>For fatigue:</strong> Ensure adequate hydration, consider iron supplements if deficient, and prioritize rest.</li>';
-            }
-            
-            if(hasPCOSSymptoms) {
-                recs += '<li><strong>For PCOS symptoms:</strong> Focus on low-GI foods, consider inositol supplements, and manage stress with yoga or meditation.</li>';
-            }
-            
-            // Check water intake
-            const waters = trackerData.map(entry => entry.water).filter(val => val);
-            const avgWater = waters.reduce((a,b) => a + b, 0) / waters.length;
-            if(avgWater < 6) {
-                recs += '<li><strong>For hydration:</strong> Aim for at least 8 glasses of water daily. Carry a water bottle with you as a reminder.</li>';
-            }
-            
-            // Check wellness activities correlation with mood
-            const wellnessActivities = {};
-            trackerData.forEach(entry => {
-                if(entry.wellness && entry.mood) {
-                    if(!wellnessActivities[entry.wellness]) {
-                        wellnessActivities[entry.wellness] = { sum: 0, count: 0 };
-                    }
-                    wellnessActivities[entry.wellness].sum += entry.mood;
-                    wellnessActivities[entry.wellness].count++;
-                }
-            });
+        saveData();
+    }
+    updateDashboard();
+    updateCharts();
+}
 
-            // Add these new breathing exercise functions
-    let breathInterval;
-    let breathPhase = 'in'; // 'in', 'hold', 'out'
-    let breathCount = 4;
-    
-    function startBreathing() {
-        const btn = document.getElementById('breath-btn');
-        const circle = document.getElementById('breath-circle');
-        
-        if(btn.textContent === 'Start Breathing Exercise') {
-            btn.textContent = 'Stop Exercise';
-            breathPhase = 'in';
-            breathCount = 4;
-            circle.style.transform = 'scale(1.2)';
-            circle.style.backgroundColor = '#d0d0d0';
-            updateBreathDisplay();
-            breathInterval = setInterval(breathTimer, 1000);
-        } else {
-            btn.textContent = 'Start Breathing Exercise';
-            clearInterval(breathInterval);
-            document.getElementById('breath-text').textContent = 'Breathe in... (4 seconds)';
-            document.getElementById('breath-timer').textContent = '4';
-            circle.style.transform = 'scale(1)';
-            circle.style.backgroundColor = '#e0e0e0';
-        }
+// Save data to localStorage
+function saveData() {
+    localStorage.setItem('wellnessTracker', JSON.stringify(trackerData));
+}
+
+// Tab navigation
+function openTab(evt, tabName) {
+    const tabContents = document.getElementsByClassName("tab-content");
+    for (let i = 0; i < tabContents.length; i++) {
+        tabContents[i].classList.remove("active");
     }
     
-    function breathTimer() {
-        const circle = document.getElementById('breath-circle');
-        breathCount--;
-        
-        if(breathCount <= 0) {
-            switch(breathPhase) {
-                case 'in':
-                    breathPhase = 'hold';
-                    breathCount = 4;
-                    document.getElementById('breath-text').textContent = 'Hold... (4 seconds)';
-                    break;
-                case 'hold':
-                    breathPhase = 'out';
-                    breathCount = 6;
-                    document.getElementById('breath-text').textContent = 'Breathe out... (6 seconds)';
-                    circle.style.transform = 'scale(1)';
-                    circle.style.backgroundColor = '#e0e0e0';
-                    break;
-                case 'out':
-                    breathPhase = 'in';
-                    breathCount = 4;
-                    document.getElementById('breath-text').textContent = 'Breathe in... (4 seconds)';
-                    circle.style.transform = 'scale(1.2)';
-                    circle.style.backgroundColor = '#d0d0d0';
-                    break;
-            }
-        }
-        
-        document.getElementById('breath-timer').textContent = breathCount;
+    const tabButtons = document.getElementsByClassName("tab-btn");
+    for (let i = 0; i < tabButtons.length; i++) {
+        tabButtons[i].classList.remove("active");
     }
     
-    function updateBreathDisplay() {
-        document.getElementById('breath-timer').textContent = breathCount;
-    }
-            
-            // Find top 3 activities with highest average mood
-            const topActivities = Object.entries(wellnessActivities)
-                .map(([activity, data]) => ({
-                    activity,
-                    avgMood: data.sum / data.count
-                }))
-                .sort((a,b) => b.avgMood - a.avgMood)
-                .slice(0, 3);
-            
-            if(topActivities.length > 0) {
-                recs += '<li><strong>Your most effective mood boosters:</strong> ';
-                recs += topActivities.map(a => `${a.activity} (avg mood ${a.avgMood.toFixed(1)}/10)`).join(', ');
-                recs += '</li>';
-            }
-            
-            recs += '</ul>';
-            
-            document.getElementById('personal-recs').innerHTML = recs;
-        }
+    document.getElementById(tabName).classList.add("active");
+    evt.currentTarget.classList.add("active");
+    
+    if (tabName === 'analytics') updateCharts();
+    if (tabName === 'recommendations') generateRecommendations();
+}
+
+// Update dashboard stats
+function updateDashboard() {
+    if (trackerData.length > 0) {
+        const moods = trackerData.map(entry => entry.mood).filter(val => val);
+        const energies = trackerData.map(entry => entry.energy).filter(val => val);
+        const waters = trackerData.map(entry => entry.water).filter(val => val);
+        const ironDays = trackerData.filter(entry => entry.ironFood === "Yes").length;
+        const pcosDays = trackerData.filter(entry => entry.pcosFood === "Yes").length;
         
-        // Journal functions
-        function saveJournalEntry() {
-            const entry = document.querySelector('.journal-entry').value;
-            if(entry.trim()) {
-                localStorage.setItem('journalEntry_' + new Date().toISOString(), entry);
-                alert('Journal entry saved!');
-            }
-        }
-        
-        function clearJournalEntry() {
-            document.querySelector('.journal-entry').value = '';
-        }
-        
-        // Show all data (for debugging)
-        function showAllData() {
-            console.log(trackerData);
-            alert('Check console for all data');
-        }
-        
-        // Initialize slider value displays
-        document.getElementById('mood').addEventListener('input', function() {
-            document.getElementById('mood-value').textContent = this.value;
-        });
-        
-        document.getElementById('energy').addEventListener('input', function() {
-            document.getElementById('energy-value').textContent = this.value;
-        });
-        
-        document.getElementById('day-mood').addEventListener('input', function() {
-            document.getElementById('day-mood-value').textContent = this.value;
-        });
-        
-        document.getElementById('day-energy').addEventListener('input', function() {
-            document.getElementById('day-energy-value').textContent = this.value;
-        });
-        
-        // Set today's date as default in tracker
-        document.getElementById('tracker-date').value = new Date().toISOString().split('T')[0];
-function startBreathing() {
-    try {
-        const btn = document.getElementById('breath-btn');
-        const circle = document.getElementById('breath-circle');
-        
-        if(!btn || !circle) {
-            throw new Error("Could not find breathing exercise elements");
-        }
-        // ... rest of the function
-    } catch(error) {
-        console.error("Breathing exercise error:", error);
-        alert("Error starting breathing exercise. Check console for details.");
+        document.getElementById('avg-mood').textContent = 
+            moods.length > 0 ? (moods.reduce((a, b) => a + b, 0) / moods.length).toFixed(1) : '-';
+        document.getElementById('avg-energy').textContent = 
+            energies.length > 0 ? (energies.reduce((a, b) => a + b, 0) / energies.length).toFixed(1) : '-';
+        document.getElementById('avg-water').textContent = 
+            waters.length > 0 ? (waters.reduce((a, b) => a + b, 0) / waters.length).toFixed(1) : '-';
+        document.getElementById('iron-days').textContent = ironDays;
+        document.getElementById('pcos-days').textContent = pcosDays;
     }
 }
-        
-        // Initialize the app
-        window.onload = initializeData;
-    </script>
+
+// Breathing Exercise Functions
+function startBreathing() {
+    const btn = document.getElementById('breath-btn');
+    const circle = document.getElementById('breath-circle');
+    
+    if (btn.textContent === 'Start Breathing Exercise') {
+        btn.textContent = 'Stop Exercise';
+        breathPhase = 'in';
+        breathCount = 4;
+        circle.style.transform = 'scale(1.3)';
+        circle.style.backgroundColor = '#a0d8f3';
+        updateBreathDisplay();
+        breathInterval = setInterval(breathTimer, 1000);
+    } else {
+        stopBreathing();
+    }
+}
+
+function stopBreathing() {
+    const btn = document.getElementById('breath-btn');
+    const circle = document.getElementById('breath-circle');
+    
+    btn.textContent = 'Start Breathing Exercise';
+    clearInterval(breathInterval);
+    document.getElementById('breath-text').textContent = 'Breathe in... (4 seconds)';
+    document.getElementById('breath-timer').textContent = '4';
+    circle.style.transform = 'scale(1)';
+    circle.style.backgroundColor = '#e0e0e0';
+}
+
+function breathTimer() {
+    const circle = document.getElementById('breath-circle');
+    breathCount--;
+    
+    if (breathCount <= 0) {
+        switch (breathPhase) {
+            case 'in':
+                breathPhase = 'hold';
+                breathCount = 4;
+                document.getElementById('breath-text').textContent = 'Hold... (4 seconds)';
+                circle.style.backgroundColor = '#f3a0a0';
+                break;
+            case 'hold':
+                breathPhase = 'out';
+                breathCount = 6;
+                document.getElementById('breath-text').textContent = 'Breathe out... (6 seconds)';
+                circle.style.transform = 'scale(1)';
+                circle.style.backgroundColor = '#a0f3c8';
+                break;
+            case 'out':
+                breathPhase = 'in';
+                breathCount = 4;
+                document.getElementById('breath-text').textContent = 'Breathe in... (4 seconds)';
+                circle.style.transform = 'scale(1.3)';
+                circle.style.backgroundColor = '#a0d8f3';
+                break;
+        }
+    }
+    document.getElementById('breath-timer').textContent = breathCount;
+}
+
+// Chart Handling
+function updateCharts() {
+    if (!trackerData.length) return;
+
+    // Destroy old charts if they exist
+    if (moodChart) moodChart.destroy();
+    if (waterChart) waterChart.destroy();
+    if (foodChart) foodChart.destroy();
+    if (wellnessChart) wellnessChart.destroy();
+
+    const sortedData = [...trackerData].sort((a, b) => new Date(a.date) - new Date(b.date));
+    const labels = sortedData.map(entry => entry.day);
+
+    // Mood Chart
+    const moodCtx = document.getElementById('moodChart').getContext('2d');
+    moodChart = new Chart(moodCtx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Mood (1-10)',
+                data: sortedData.map(entry => entry.mood),
+                borderColor: '#888',
+                backgroundColor: 'rgba(200, 200, 200, 0.1)',
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: false, min: 1, max: 10 }
+            }
+        }
+    });
+
+    // Water Chart
+    const waterCtx = document.getElementById('waterChart').getContext('2d');
+    waterChart = new Chart(waterCtx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Water (glasses)',
+                data: sortedData.map(entry => entry.water),
+                backgroundColor: 'rgba(150, 150, 150, 0.7)'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true, max: 15 }
+            }
+        }
+    });
+}
+
+// Initialize on load
+window.onload = function() {
+    initializeData();
+    document.getElementById('tracker-date').value = new Date().toISOString().split('T')[0];
+    
+    // Event listeners for sliders
+    document.getElementById('mood').addEventListener('input', function() {
+        document.getElementById('mood-value').textContent = this.value;
+    });
+    document.getElementById('energy').addEventListener('input', function() {
+        document.getElementById('energy-value').textContent = this.value;
+    });
+};
+</script>
 </body>
 </html>
