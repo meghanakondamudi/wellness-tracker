@@ -7,6 +7,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+    @font-face {
+        font-family: 'Koch Geometric';
+        src: url('https://fonts.cdnfonts.com/css/koch-geometric') format('woff2');
+        font-weight: normal;
+        font-style: normal;
+    }
+    
     :root {
         --bg-white: #ffffff;
         --bg-gray: #f7f7f7;
@@ -37,7 +44,7 @@
     
     header {
         background-color: var(--bg-white);
-        padding: 30px 0;
+        padding: 30px 0 20px 0;
         margin-bottom: 20px;
         text-align: center;
         border-bottom: 1px solid var(--border-gray);
@@ -52,6 +59,34 @@
         margin: 0;
         font-size: 2em;
         letter-spacing: -0.5px;
+        font-family: 'Koch Geometric', sans-serif;
+        color: #4080d4;
+    }
+    
+    .emoji-scroller {
+        margin: 15px auto 0 auto;
+        overflow-x: auto;
+        white-space: nowrap;
+        width: 90%;
+        max-width: 600px;
+        padding: 10px 0;
+        scrollbar-width: none; /* Firefox */
+    }
+    
+    .emoji-scroller::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+    }
+    
+    .emoji-container {
+        display: inline-block;
+        text-align: center;
+        min-width: 100%;
+    }
+    
+    .emoji {
+        font-size: 2.5em;
+        margin: 0 20px;
+        display: inline-block;
     }
     
     h2 {
@@ -235,6 +270,11 @@
             font-size: 0.8em;
             min-width: 50px;
         }
+        
+        .emoji {
+            font-size: 2em;
+            margin: 0 15px;
+        }
     }
         .breath-container {
         display: flex;
@@ -267,6 +307,15 @@
     <div class="container">
         <header>
             <h1>Wellness Tracker</h1>
+            <div class="emoji-scroller">
+                <div class="emoji-container">
+                    <span class="emoji">☀</span>
+                    <span class="emoji">🍉</span>
+                    <span class="emoji">🍦</span>
+                    <span class="emoji">🌊</span>
+                    <span class="emoji">🏝️</span>
+                </div>
+            </div>
         </header>
         
         <div class="tabs">
